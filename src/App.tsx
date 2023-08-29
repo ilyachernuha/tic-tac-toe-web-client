@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createUser, loginUser } from "./api";
+import { Login } from "./routes/login";
+import { Register } from "./routes/register";
+import { Root } from "./routes/root";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const [error, response] = await createUser(
+    event.target.username.value,
+    event.target.password.value
+  );
+  if (error) {
+    return console.log("Error");
+  }
+  const [error2, response2] = await loginUser(
+    event.target.username.value,
+    event.target.password.value
+  );
+  console.log(response2);
 }
 
-export default App
+async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const [error, response] = await loginUser(
+    event.target.username.value,
+    event.target.password.value
+  );
+  if (error) {
+    return console.log("Error");
+  }
+
+  console.log(response);
+}
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root handleLogin={handleLogin} />,
+  },
+  {
+    path: "/login",
+    element: <Login handleLogin={handleLogin} />,
+  },
+  {
+    path: "/register",
+    element: <Register handleRegister={handleRegister} />,
+  },
+]);
+
+function App() {
+  return <RouterProvider router={router} />;
+}
+
+export default App;
