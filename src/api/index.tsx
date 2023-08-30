@@ -1,7 +1,18 @@
 import axios from "axios";
 
+export async function getServerStatus() {
+  try {
+    await axios.get(
+      `${new URL(import.meta.env.VITE_API_URL).origin}/check_availability`
+    );
+    return [false, true];
+  } catch (error) {
+    console.error(error);
+    return [true, null];
+  }
+}
+
 export async function createUser(username: string, password: string) {
-  console.log(import.meta.env.VITE_API_URL);
   try {
     const response = await axios.post(
       `${new URL(import.meta.env.VITE_API_URL).origin}/create_user`,
@@ -21,7 +32,6 @@ export async function createUser(username: string, password: string) {
 }
 
 export async function loginUser(username: string, password: string) {
-  console.log(import.meta.env.VITE_API_URL);
   try {
     const response = await axios.post(
       `${new URL(import.meta.env.VITE_API_URL).origin}/login`,

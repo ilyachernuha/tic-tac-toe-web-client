@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { createUser, loginUser } from "./api";
+import { getServerStatus, createUser, loginUser } from "./api";
 import { Login } from "./routes/login";
 import { Register } from "./routes/register";
 import { Root } from "./routes/root";
@@ -76,7 +76,22 @@ const router = createBrowserRouter(
 );
 
 function App() {
-  return <RouterProvider router={router} />;
+  const [serverStatus, setServerStatus] = useState(false);
+  useEffect(() => {
+    getServerStatus().then((resolve) => {
+      const [error, response] = resolve;
+      if (error) return console.error("Error chech server status");
+      if (response) setServerStatus(true);
+    });
+  }, []);
+  return (
+    <>
+      <button className="button" data-type={serverStatus ? "primary" : ""}>
+        Server {serverStatus ? "online" : "offline"}
+      </button>
+      <RouterProvider router={router} />;
+    </>
+  );
 }
 
 export default App;
