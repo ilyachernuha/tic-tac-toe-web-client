@@ -57,20 +57,23 @@ async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
   console.log(response);
 }
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Root handleLogin={handleLogin} />,
-  },
-  {
-    path: "/login",
-    element: <Login handleLogin={handleLogin} />,
-  },
-  {
-    path: "/register",
-    element: <Register handleRegister={handleRegister} />,
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <Root handleLogin={handleLogin} />,
+    },
+    {
+      path: "/login",
+      element: <Login handleLogin={handleLogin} />,
+    },
+    {
+      path: "/register",
+      element: <Register handleRegister={handleRegister} />,
+    },
+  ],
+  { basename: import.meta.env.VITE_BASE_URL }
+);
 
 function App() {
   return <RouterProvider router={router} />;
