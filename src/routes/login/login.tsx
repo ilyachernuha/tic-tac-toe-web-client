@@ -1,4 +1,8 @@
-export function Login({ handleLogin }) {
+interface LoginProps {
+  handleLogin: React.FormEventHandler<HTMLFormElement>;
+}
+
+export function Login({ handleLogin }: LoginProps) {
   return (
     <div className="section container contact-form">
       <h1 className="heading-3 margin-block-end-5">Login into account</h1>

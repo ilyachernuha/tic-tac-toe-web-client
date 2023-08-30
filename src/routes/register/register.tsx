@@ -1,4 +1,8 @@
-export function Register({ handleRegister }) {
+interface RegisterProps {
+  handleRegister: React.FormEventHandler<HTMLFormElement>;
+}
+
+export function Register({ handleRegister }: RegisterProps) {
   return (
     <div className="section container contact-form">
       <h1 className="heading-3 margin-block-end-5">Create an account</h1>

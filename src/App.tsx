@@ -6,27 +6,50 @@ import { Register } from "./routes/register";
 import { Root } from "./routes/root";
 
 async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
-  event.preventDefault();
-  const [error, response] = await createUser(
-    event.target.username.value,
-    event.target.password.value
-  );
-  if (error) {
-    return console.log("Error");
+  interface FormDataElements extends HTMLFormControlsCollection {
+    username: HTMLInputElement;
+    password: HTMLInputElement;
   }
-  const [error2, response2] = await loginUser(
-    event.target.username.value,
-    event.target.password.value
+
+  event.preventDefault();
+
+  const elements = event.currentTarget.elements as FormDataElements;
+  const [error] = await createUser(
+    elements.username.value,
+    elements.password.value
   );
+
+  if (error) {
+    return console.log("Error Register");
+  }
+
+  const [error2, response2] = await loginUser(
+    elements.username.value,
+    elements.password.value
+  );
+
+  if (error2) {
+    return console.log("Error Login");
+  }
+
   console.log(response2);
 }
 
 async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  interface FormDataElements extends HTMLFormControlsCollection {
+    username: HTMLInputElement;
+    password: HTMLInputElement;
+  }
+
   event.preventDefault();
+
+  const elements = event.currentTarget.elements as FormDataElements;
+
   const [error, response] = await loginUser(
-    event.target.username.value,
-    event.target.password.value
+    elements.username.value,
+    elements.password.value
   );
+
   if (error) {
     return console.log("Error");
   }
