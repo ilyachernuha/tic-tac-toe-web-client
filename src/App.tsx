@@ -51,7 +51,7 @@ async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
   );
 
   if (error) {
-    return console.log("Error");
+    return console.log("Error Login");
   }
 
   console.log(response);
@@ -74,8 +74,6 @@ const router = createBrowserRouter(
   ],
   { basename: import.meta.env.BASE_URL }
 );
-
-console.log(import.meta.env.BASE_URL);
 
 function App() {
   return <RouterProvider router={router} />;
