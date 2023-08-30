@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 interface LoginProps {
   handleLogin: React.FormEventHandler<HTMLFormElement>;
 }
@@ -24,9 +26,9 @@ export function Login({ handleLogin }: LoginProps) {
         <button className="button" data-type="accent" type="submit">
           Login
         </button>
-        <a className="button" href="/register">
+        <Link className="button" to="/register">
           Create an account
-        </a>
+        </Link>
       </form>
     </div>
   );

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 interface RegisterProps {
   handleRegister: React.FormEventHandler<HTMLFormElement>;
 }
@@ -24,9 +26,9 @@ export function Register({ handleRegister }: RegisterProps) {
         <button className="button" data-type="accent" type="submit">
           Register
         </button>
-        <a className="button" href="/">
-          Login
-        </a>
+        <Link className="button" to="/login">
+          Login to an account
+        </Link>
       </form>
     </div>
   );
