@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 
 interface RegisterProps {
-  handleRegister: React.FormEventHandler<HTMLFormElement>;
+  onRegister: React.FormEventHandler<HTMLFormElement>;
 }
 
-export function Register({ handleRegister }: RegisterProps) {
+export function Register({ onRegister }: RegisterProps) {
   return (
     <div className="section container contact-form">
       <h1 className="heading-3 margin-block-end-5">Create an account</h1>
-      <form className="form-group" onSubmit={handleRegister}>
+      <form className="form-group" onSubmit={onRegister}>
         <input
           type="text"
           name="username"

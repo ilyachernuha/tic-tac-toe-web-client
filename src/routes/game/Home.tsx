@@ -1,14 +1,11 @@
 import { Link } from "react-router-dom";
 
-interface RootProps {
-  handleLogin: React.FormEventHandler<HTMLFormElement>;
-}
-
-export function Root({ handleLogin }: RootProps) {
+export function Home() {
+  const { onLogin } = useAuth();
   return (
     <div className="section container contact-form">
       <h1 className="heading-3 margin-block-end-5">Login into account</h1>
-      <form className="form-group" onSubmit={handleLogin}>
+      <form className="form-group" onSubmit={onLogin}>
         <input
           type="text"
           name="username"

@@ -1,77 +1,92 @@
-import React, { useEffect, useState } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { getServerStatus, createUser, loginUser } from "./api";
-import { Login } from "./routes/login";
-import { Register } from "./routes/register";
-import { Root } from "./routes/root";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import {
+  getServerStatus,
+  createUser,
+  loginUser,
+  startWaiting,
+  getWaitingUsers,
+} from "./api";
+import Layout from "./layouts/Layout";
 
-async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
-  interface FormDataElements extends HTMLFormControlsCollection {
-    username: HTMLInputElement;
-    password: HTMLInputElement;
-  }
+const AuthContext = createContext(null);
 
-  event.preventDefault();
+const AuthProvider = ({ children }) => {
+  const [token, setToken] = useState(null);
 
-  const elements = event.currentTarget.elements as FormDataElements;
-  const [error] = await createUser(
-    elements.username.value,
-    elements.password.value
-  );
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    interface FormDataElements extends HTMLFormControlsCollection {
+      username: HTMLInputElement;
+      password: HTMLInputElement;
+    }
 
-  if (error) {
-    return console.log("Error Register");
-  }
+    event.preventDefault();
 
-  const [error2, response2] = await loginUser(
-    elements.username.value,
-    elements.password.value
-  );
+    const elements = event.currentTarget.elements as FormDataElements;
 
-  if (error2) {
-    return console.log("Error Login");
-  }
+    const [error, response] = await loginUser(
+      elements.username.value,
+      elements.password.value
+    );
 
-  console.log(response2);
-}
+    if (error) {
+      return console.log("Error Login");
+    }
 
-async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
-  interface FormDataElements extends HTMLFormControlsCollection {
-    username: HTMLInputElement;
-    password: HTMLInputElement;
-  }
+    const token = response.data.token;
 
-  event.preventDefault();
+    setToken(token);
+  };
 
-  const elements = event.currentTarget.elements as FormDataElements;
+  const handleLogout = async () => {
+    setToken(null);
+  };
 
-  const [error] = await loginUser(
-    elements.username.value,
-    elements.password.value
-  );
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
+    console.log(event);
 
-  if (error) {
-    return console.log("Error Login");
-  }
-}
+    // interface FormDataElements extends HTMLFormControlsCollection {
+    //   username: HTMLInputElement;
+    //   password: HTMLInputElement;
+    // }
 
-const router = createBrowserRouter(
-  [
-    {
-      path: "/",
-      element: <Root handleLogin={handleLogin} />,
-    },
-    {
-      path: "/login",
-      element: <Login handleLogin={handleLogin} />,
-    },
-    {
-      path: "/register",
-      element: <Register handleRegister={handleRegister} />,
-    },
-  ],
-  { basename: import.meta.env.BASE_URL }
-);
+    // event.preventDefault();
+
+    // const elements = event.currentTarget.elements as FormDataElements;
+    // const [error] = await createUser(
+    //   elements.username.value,
+    //   elements.password.value
+    // );
+
+    // if (error) {
+    //   return console.log("Error Register");
+    // }
+
+    // const [error2, response2] = await loginUser(
+    //   elements.username.value,
+    //   elements.password.value
+    // );
+
+    // if (error2) {
+    //   return console.log("Error Login");
+    // }
+
+    // console.log(response2);
+  };
+
+  const value = {
+    token,
+    onLogin: handleLogin,
+    onLogout: handleLogout,
+    onRegister: handleRegister,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+const useAuth = () => {
+  return useContext(AuthContext);
+};
 
 function App() {
   const [serverStatus, setServerStatus] = useState(false);
@@ -83,14 +98,79 @@ function App() {
       if (response) setServerStatus(true);
     });
   }, []);
+
   return (
-    <>
-      <button className="button" data-type={serverStatus ? "primary" : ""}>
-        Server {serverStatus ? "online" : "offline"}
-      </button>
-      <RouterProvider router={router} />
-    </>
+    <AuthProvider>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <Routes>
+          <Route path="/" element={<Layout serverStatus={serverStatus} />}>
+            <Route index element={<Home />}></Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
+
+const Home = () => {
+  const { token } = useAuth();
+  return token ? <Game /> : <LoginForm />;
+};
+
+const Game = () => {
+  const { token } = useAuth();
+  const [waitingUsers, setWaitingUsers] = useState([]);
+  useEffect(() => {
+    startWaiting(token).then();
+    getWaitingUsers(token).then((resolve) => {
+      setWaitingUsers(resolve[1]);
+    });
+  }, []);
+
+  return (
+    <div>
+      <h1 className="heading-3">Players online:</h1>
+      <ul>
+        {waitingUsers.map((user) => (
+          <li className="card">
+            {user}
+            <button>Invite</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const LoginForm = () => {
+  const { onLogin, onRegister } = useAuth();
+  return (
+    <div className="section container contact-form">
+      <h1 className="heading-3 margin-block-end-5">Login into account</h1>
+      <form className="form-group" onSubmit={onLogin}>
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          id="username"
+          required
+        ></input>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          id="password"
+          required
+        ></input>
+        <button className="button" data-type="accent" type="submit">
+          Login
+        </button>
+        <a className="button" onClick={onRegister}>
+          Create an account
+        </a>
+      </form>
+    </div>
+  );
+};
 
 export default App;
