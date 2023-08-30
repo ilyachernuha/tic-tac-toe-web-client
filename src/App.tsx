@@ -72,10 +72,10 @@ const router = createBrowserRouter(
       element: <Register handleRegister={handleRegister} />,
     },
   ],
-  { basename: import.meta.env.VITE_BASE_URL }
+  { basename: import.meta.env.BASE_URL }
 );
 
-console.log(import.meta.env.VITE_BASE_URL);
+console.log(import.meta.env.BASE_URL);
 
 function App() {
   return <RouterProvider router={router} />;
