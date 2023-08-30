@@ -45,7 +45,7 @@ async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
 
   const elements = event.currentTarget.elements as FormDataElements;
 
-  const [error, response] = await loginUser(
+  const [error] = await loginUser(
     elements.username.value,
     elements.password.value
   );
@@ -53,8 +53,6 @@ async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
   if (error) {
     return console.log("Error Login");
   }
-
-  console.log(response);
 }
 
 const router = createBrowserRouter(
@@ -77,6 +75,7 @@ const router = createBrowserRouter(
 
 function App() {
   const [serverStatus, setServerStatus] = useState(false);
+
   useEffect(() => {
     getServerStatus().then((resolve) => {
       const [error, response] = resolve;
@@ -89,7 +88,7 @@ function App() {
       <button className="button" data-type={serverStatus ? "primary" : ""}>
         Server {serverStatus ? "online" : "offline"}
       </button>
-      <RouterProvider router={router} />;
+      <RouterProvider router={router} />
     </>
   );
 }
