@@ -75,6 +75,8 @@ const router = createBrowserRouter(
   { basename: import.meta.env.VITE_BASE_URL }
 );
 
+console.log(import.meta.env.VITE_BASE_URL);
+
 function App() {
   return <RouterProvider router={router} />;
 }
