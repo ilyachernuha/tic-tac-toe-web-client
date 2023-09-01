@@ -246,11 +246,17 @@ const Menu = () => {
   };
 
   useEffect(() => {
+    const pollingInterval = setInterval(() => {
+      fetchWaitingUsers();
+      fetchInvitations();
+      refreshSentInvitations();
+    }, 1000);
     startWaiting(token).then();
     fetchWaitingUsers();
     fetchInvitations();
     return () => {
       stopWaiting(token).then();
+      clearInterval(pollingInterval);
     };
   }, []);
 
@@ -267,20 +273,11 @@ const Menu = () => {
   return (
     <>
       <div className="section container">
-        <div>
-          <h1 className="heading-3 margin-block-5">Players Online</h1>
-          <button
-            className="button"
-            data-type="primary"
-            onClick={fetchWaitingUsers}
-          >
-            Refresh
-          </button>
-        </div>
+        <h1 className="heading-3">Players Online</h1>
         <ul>
           {waitingUsers.map((username) => (
             <li className="card margin-block-5" key={username}>
-              <h2 className="card__heading">{username}</h2>
+              <h2 className="heading-3 margin-block-end-5">{username}</h2>
               <form data-username={username} onSubmit={onInvite}>
                 <div className="card-inputs">
                   <label htmlFor="gridSize">
@@ -324,16 +321,8 @@ const Menu = () => {
         </ul>
       </div>
       <div className="section container">
-        <div>
-          <h1 className="heading-3 margin-block-5">Sent Invitations</h1>
-          <button
-            className="button"
-            data-type="primary"
-            onClick={refreshSentInvitations}
-          >
-            Refresh
-          </button>
-        </div>
+        <h1 className="heading-3">Sent Invitations</h1>
+        {sentInvitations.length === 0 && <p>No sent invitations</p>}
         <ul>
           {sentInvitations.map((invitation) => (
             <li className="card margin-block-5" key={invitation.id}>
@@ -369,16 +358,8 @@ const Menu = () => {
         </ul>
       </div>
       <div className="section container">
-        <div>
-          <h1 className="heading-3 margin-block-5">Received Invitations</h1>
-          <button
-            className="button"
-            data-type="primary"
-            onClick={fetchInvitations}
-          >
-            Refresh
-          </button>
-        </div>
+        <h1 className="heading-3">Received Invitations</h1>
+        {receivedInvitations.length === 0 && <p>No recieved invitations</p>}
         <ul>
           {receivedInvitations.map((invitation: Invitation) => (
             <li className="card margin-block-5" key={invitation.id}>

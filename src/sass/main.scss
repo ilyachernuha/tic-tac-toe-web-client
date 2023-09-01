@@ -9,3 +9,9 @@
   place-content: center;
   padding-block-end: 0;
 }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

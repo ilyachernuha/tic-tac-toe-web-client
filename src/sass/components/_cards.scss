@@ -1,9 +1,7 @@
 @use "../abstracts/" as *;
 
 .card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  list-style: none;
   gap: $card-flow-spacing;
   padding: $card-padding;
   background-color: $card-background-default;
@@ -26,6 +24,11 @@
     display: flex;
     gap: 2rem;
     align-items: center;
+    justify-content: space-between;
+
+    span {
+      font-weight: bold;
+    }
 
     .card-inputs {
       display: grid;
@@ -37,7 +40,7 @@
         input:not(button),
         select {
           width: 3rem;
-          padding-inline-start: .5rem
+          padding-inline-start: 0.5rem;
         }
       }
     }
