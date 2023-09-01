@@ -274,6 +274,7 @@ const Menu = () => {
     <>
       <div className="section container">
         <h1 className="heading-3">Players Online</h1>
+        {waitingUsers.length === 0 && <p>No waiting users</p>}
         <ul>
           {waitingUsers.map((username) => (
             <li className="card margin-block-5" key={username}>
