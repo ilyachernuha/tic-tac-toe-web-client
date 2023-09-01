@@ -222,11 +222,14 @@ const Menu = () => {
   const refreshSentInvitations = async () => {
     const nextSentInvitations = sentInvitations.slice();
     nextSentInvitations.map(async (invitation) => {
-      const [error, data] = await pollInvitationStatus(invitation.id, token);
+      const [error, data] = await pollInvitationStatus(
+        invitation.id as string,
+        token
+      );
       if (error) {
         return invitation;
       }
-      const { status, gameId } = data;
+      const { status, gameId } = data as any;
       invitation.status = status;
       invitation.gameId = gameId;
       return invitation;
