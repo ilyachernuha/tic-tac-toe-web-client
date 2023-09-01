@@ -3,3 +3,9 @@
 @use "layout";
 @use "utilities";
 @use "vendor";
+
+.server-status {
+  display: grid;
+  place-content: center;
+  padding-block-end: 0;
+}

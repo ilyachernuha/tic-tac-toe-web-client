@@ -6,34 +6,52 @@ import {
   loginUser,
   startWaiting,
   getWaitingUsers,
+  stopWaiting,
+  sendInvitation,
+  getReceivedInvitations,
+  acceptInvitation,
+  declineInvitation,
+  cancelInvitation,
+  pollInvitationStatus,
 } from "./api";
 import Layout from "./layouts/Layout";
+import { Game } from "./routes/";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<any>(null);
 
-const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }: React.PropsWithChildren) => {
+  const [username, setUsername] = useState<string | null>(null);
+  const [password, setPassword] = useState<string | null>(null);
   const [token, setToken] = useState(null);
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>) => {
     interface FormDataElements extends HTMLFormControlsCollection {
       username: HTMLInputElement;
       password: HTMLInputElement;
     }
 
-    event.preventDefault();
-
     const elements = event.currentTarget.elements as FormDataElements;
 
-    const [error, response] = await loginUser(
-      elements.username.value,
-      elements.password.value
-    );
+    setUsername(elements.username.value);
+    setPassword(elements.password.value);
+  };
 
-    if (error) {
-      return console.log("Error Login");
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!username) {
+      return console.error("Username is required!");
     }
 
-    const token = response.data.token;
+    if (!password) {
+      return console.error("Password is required!");
+    }
+
+    const [error, token] = await loginUser(username, password);
+
+    if (error) {
+      return console.error("Error Login");
+    }
 
     setToken(token);
   };
@@ -42,36 +60,24 @@ const AuthProvider = ({ children }) => {
     setToken(null);
   };
 
-  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
-    console.log(event);
+  const handleRegister = async (event: React.FormEvent<HTMLButtonElement>) => {
+    event.preventDefault();
 
-    // interface FormDataElements extends HTMLFormControlsCollection {
-    //   username: HTMLInputElement;
-    //   password: HTMLInputElement;
-    // }
+    if (!username) {
+      return console.error("Username is required!");
+    }
 
-    // event.preventDefault();
+    if (!password) {
+      return console.error("Password is required!");
+    }
 
-    // const elements = event.currentTarget.elements as FormDataElements;
-    // const [error] = await createUser(
-    //   elements.username.value,
-    //   elements.password.value
-    // );
+    const [error, token] = await createUser(username, password);
 
-    // if (error) {
-    //   return console.log("Error Register");
-    // }
+    if (error) {
+      return console.error("Error Register");
+    }
 
-    // const [error2, response2] = await loginUser(
-    //   elements.username.value,
-    //   elements.password.value
-    // );
-
-    // if (error2) {
-    //   return console.log("Error Login");
-    // }
-
-    // console.log(response2);
+    setToken(token);
   };
 
   const value = {
@@ -79,6 +85,7 @@ const AuthProvider = ({ children }) => {
     onLogin: handleLogin,
     onLogout: handleLogout,
     onRegister: handleRegister,
+    onFormChange: handleFormChange,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -91,19 +98,28 @@ const useAuth = () => {
 function App() {
   const [serverStatus, setServerStatus] = useState(false);
 
+  const fetchServerStatus = async () => {
+    const status = await getServerStatus();
+    setServerStatus(status);
+  };
+
   useEffect(() => {
-    getServerStatus().then((resolve) => {
-      const [error, response] = resolve;
-      if (error) return console.error("Error chech server status");
-      if (response) setServerStatus(true);
-    });
+    fetchServerStatus();
   }, []);
 
   return (
     <AuthProvider>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
-          <Route path="/" element={<Layout serverStatus={serverStatus} />}>
+          <Route
+            path="/"
+            element={
+              <Layout
+                serverStatus={serverStatus}
+                onClickServerStatus={fetchServerStatus}
+              />
+            }
+          >
             <Route index element={<Home />}></Route>
           </Route>
         </Routes>
@@ -114,40 +130,294 @@ function App() {
 
 const Home = () => {
   const { token } = useAuth();
-  return token ? <Game /> : <LoginForm />;
+  return token ? <Menu /> : <LoginForm />;
 };
 
-const Game = () => {
+const Menu = () => {
   const { token } = useAuth();
-  const [waitingUsers, setWaitingUsers] = useState([]);
+  const [waitingUsers, setWaitingUsers] = useState<string[]>([]);
+  const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
+  const [receivedInvitations, setReceivedInvitations] = useState<Invitation[]>(
+    []
+  );
+  const [game, setGame] = useState<Game | null>(null);
+
+  const fetchWaitingUsers = async () => {
+    const [error, waitingUsers] = await getWaitingUsers(token);
+    if (error) {
+      console.error(error);
+    }
+    setWaitingUsers(waitingUsers);
+  };
+
+  const fetchInvitations = async () => {
+    const [error, invitations] = await getReceivedInvitations(token);
+    if (error) {
+      console.error(error);
+    }
+    setReceivedInvitations(invitations);
+  };
+
+  interface FormDataElements extends HTMLFormControlsCollection {
+    gridSize: HTMLInputElement;
+    winningLine: HTMLInputElement;
+    playingToken: HTMLSelectElement;
+  }
+
+  const onInvite = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const username = form.dataset.username as string;
+    const elements = form.elements as FormDataElements;
+    const { gridSize, winningLine, playingToken } = elements;
+    const invitation = {
+      inviter: username,
+      inviterPlayingX: playingToken.value === "x",
+      gridSize: Number(gridSize.value),
+      winningLine: Number(winningLine.value),
+      status: "pending",
+    };
+    const [error, invitationId] = await sendInvitation(invitation, token);
+    if (error) {
+      return console.error("Error sending invitation");
+    }
+    setSentInvitations([
+      ...sentInvitations,
+      { ...invitation, id: invitationId },
+    ]);
+  };
+
+  const onAccept = async ({ id, inviterPlayingX, gridSize }: Invitation) => {
+    const [error, gameId] = await acceptInvitation(id as string, token);
+    if (error) {
+      return console.error("Error accepting invitation");
+    }
+    setGame({
+      id: gameId,
+      playingX: !inviterPlayingX,
+      gridSize: gridSize,
+    });
+  };
+
+  const onDecline = async (invitationId: string) => {
+    const [error] = await declineInvitation(invitationId, token);
+    if (error) {
+      return console.error("Error declining invitation");
+    }
+    setReceivedInvitations([
+      ...receivedInvitations.filter(({ id }) => id !== invitationId),
+    ]);
+  };
+
+  const onCancel = async (invitationId: string) => {
+    const [error] = await cancelInvitation(invitationId, token);
+    if (error) {
+      return console.error("Error canceling invitation");
+    }
+    setSentInvitations([
+      ...sentInvitations.filter(({ id }) => id !== invitationId),
+    ]);
+  };
+
+  const refreshSentInvitations = async () => {
+    const nextSentIntitations = sentInvitations.slice();
+    nextSentIntitations.map(async (invitation) => {
+      const [error, data] = await pollInvitationStatus(
+        invitation.id as string,
+        token
+      );
+      if (error) {
+        return invitation;
+      }
+      const { status, gameId } = data as any;
+      invitation.status = status;
+      invitation.gameId = gameId;
+      return invitation;
+    });
+    setSentInvitations(nextSentIntitations);
+  };
+
+  const handlePlay = (invitation: Invitation) => {
+    setGame({
+      id: invitation.gameId as any,
+      playingX: invitation.inviterPlayingX,
+      gridSize: invitation.gridSize,
+    });
+  };
+
   useEffect(() => {
     startWaiting(token).then();
-    getWaitingUsers(token).then((resolve) => {
-      setWaitingUsers(resolve[1]);
-    });
+    fetchWaitingUsers();
+    fetchInvitations();
+    return () => {
+      stopWaiting(token).then();
+    };
   }, []);
 
+  if (game)
+    return (
+      <Game
+        gameId={game.id}
+        gridSize={game.gridSize}
+        sign={game.playingX ? "x" : "o"}
+        token={token}
+      />
+    );
+
   return (
-    <div>
-      <h1 className="heading-3">Players online:</h1>
-      <ul>
-        {waitingUsers.map((user) => (
-          <li className="card">
-            {user}
-            <button>Invite</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <div className="section container">
+        <div>
+          <h1 className="heading-3 margin-block-5">Players Online</h1>
+          <button
+            className="button"
+            data-type="primary"
+            onClick={fetchWaitingUsers}
+          >
+            Refresh
+          </button>
+        </div>
+        <ul>
+          {waitingUsers.map((username) => (
+            <li className="card margin-block-5" key={username}>
+              <h2 className="card__heading">{username}</h2>
+              <form data-username={username} onSubmit={onInvite}>
+                <div className="card-inputs">
+                  <label htmlFor="gridSize">
+                    Grid size:
+                    <input
+                      name="gridSize"
+                      type="number"
+                      min="3"
+                      max="15"
+                      defaultValue="3"
+                      required
+                    />
+                  </label>
+                  <label htmlFor="winningLine">
+                    Winning line:
+                    <input
+                      name="winningLine"
+                      type="number"
+                      min="3"
+                      max="15"
+                      defaultValue="3"
+                      required
+                    />
+                  </label>
+                  <label htmlFor="playingToken">
+                    Token:
+                    <select name="playingToken" defaultValue="x" required>
+                      <option value="x">X</option>
+                      <option value="o">O</option>
+                    </select>
+                  </label>
+                </div>
+                <div>
+                  <button className="button" type="submit" data-type="primary">
+                    Invite
+                  </button>
+                </div>
+              </form>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="section container">
+        <div>
+          <h1 className="heading-3 margin-block-5">Sent Invitations</h1>
+          <button
+            className="button"
+            data-type="primary"
+            onClick={refreshSentInvitations}
+          >
+            Refresh
+          </button>
+        </div>
+        <ul>
+          {sentInvitations.map((invitation) => (
+            <li className="card margin-block-5" key={invitation.id}>
+              <h2 className="card__heading">{invitation.inviter}</h2>
+              <div>
+                <p>Grid size: {invitation.gridSize}</p>
+                <p>Winning line: {invitation.winningLine}</p>
+                <p>Your symbol: {invitation.inviterPlayingX ? "X" : "O"}</p>
+                <p>Status: {invitation.status}</p>
+              </div>
+              <div>
+                {invitation.status === "pending" && (
+                  <button
+                    className="button"
+                    data-type="accent"
+                    onClick={() => onCancel(invitation.id as string)}
+                  >
+                    Cancel
+                  </button>
+                )}
+                {invitation.status === "accepted" && (
+                  <button
+                    className="button"
+                    data-type="primary"
+                    onClick={() => handlePlay(invitation)}
+                  >
+                    Play
+                  </button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="section container">
+        <div>
+          <h1 className="heading-3 margin-block-5">Received Invitations</h1>
+          <button
+            className="button"
+            data-type="primary"
+            onClick={fetchInvitations}
+          >
+            Refresh
+          </button>
+        </div>
+        <ul>
+          {receivedInvitations.map((invitation: Invitation) => (
+            <li className="card margin-block-5" key={invitation.id}>
+              <h2 className="card__heading">{invitation.inviter}</h2>
+              <div>
+                <p>Grid size: {invitation.gridSize}</p>
+                <p>Winning line: {invitation.winningLine}</p>
+                <p>Your symbol: {invitation.inviterPlayingX ? "O" : "X"}</p>
+              </div>
+              <div className="card__buttons">
+                <button
+                  className="button"
+                  data-type="primary"
+                  onClick={() => onAccept(invitation)}
+                >
+                  Accept
+                </button>
+                <button
+                  className="button"
+                  data-type="accent"
+                  onClick={() => onDecline(invitation.id as string)}
+                >
+                  Decline
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 };
 
 const LoginForm = () => {
-  const { onLogin, onRegister } = useAuth();
+  const { onLogin, onRegister, onFormChange } = useAuth();
   return (
-    <div className="section container contact-form">
+    <div className="section container login-form">
       <h1 className="heading-3 margin-block-end-5">Login into account</h1>
-      <form className="form-group" onSubmit={onLogin}>
+      <form className="form-group" onSubmit={onLogin} onChange={onFormChange}>
         <input
           type="text"
           name="username"
@@ -162,7 +432,12 @@ const LoginForm = () => {
           id="password"
           required
         ></input>
-        <button className="button" data-type="accent" type="submit">
+        <button
+          className="button"
+          data-type="accent"
+          type="submit"
+          onClick={onLogin}
+        >
           Login
         </button>
         <a className="button" onClick={onRegister}>

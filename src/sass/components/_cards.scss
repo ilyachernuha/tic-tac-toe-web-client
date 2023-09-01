@@ -1,7 +1,9 @@
 @use "../abstracts/" as *;
 
 .card {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: $card-flow-spacing;
   padding: $card-padding;
   background-color: $card-background-default;
@@ -13,5 +15,31 @@
 
   &__heading {
     @include heading($card-heading-font-size, $card-heading-color-default);
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  form {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+
+    .card-inputs {
+      display: grid;
+      gap: 0.5rem;
+      label {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        input:not(button),
+        select {
+          width: 3rem;
+          padding-inline-start: .5rem
+        }
+      }
+    }
   }
 }
