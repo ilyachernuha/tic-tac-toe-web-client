@@ -220,21 +220,18 @@ const Menu = () => {
   };
 
   const refreshSentInvitations = async () => {
-    const nextSentIntitations = sentInvitations.slice();
-    nextSentIntitations.map(async (invitation) => {
-      const [error, data] = await pollInvitationStatus(
-        invitation.id as string,
-        token
-      );
+    const nextSentInvitations = sentInvitations.slice();
+    nextSentInvitations.map(async (invitation) => {
+      const [error, data] = await pollInvitationStatus(invitation.id, token);
       if (error) {
         return invitation;
       }
-      const { status, gameId } = data as any;
+      const { status, gameId } = data;
       invitation.status = status;
       invitation.gameId = gameId;
       return invitation;
     });
-    setSentInvitations(nextSentIntitations);
+    setSentInvitations(nextSentInvitations);
   };
 
   const handlePlay = (invitation: Invitation) => {
@@ -249,7 +246,6 @@ const Menu = () => {
     const pollingInterval = setInterval(() => {
       fetchWaitingUsers();
       fetchInvitations();
-      refreshSentInvitations();
     }, 1000);
     startWaiting(token).then();
     fetchWaitingUsers();
@@ -322,7 +318,16 @@ const Menu = () => {
         </ul>
       </div>
       <div className="section container">
-        <h1 className="heading-3">Sent Invitations</h1>
+        <div className="section-header">
+          <h1 className="heading-3">Sent Invitations</h1>
+          <button
+            className="button"
+            data-type="primary"
+            onClick={refreshSentInvitations}
+          >
+            Refresh
+          </button>
+        </div>
         {sentInvitations.length === 0 && <p>No sent invitations</p>}
         <ul>
           {sentInvitations.map((invitation) => (
