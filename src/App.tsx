@@ -423,6 +423,9 @@ const LoginForm = () => {
           name="username"
           placeholder="Username"
           id="username"
+          minLength={2}
+          maxLength={16}
+          pattern="^[a-zA-Z0-9]*$"
           required
         ></input>
         <input
@@ -430,6 +433,9 @@ const LoginForm = () => {
           name="password"
           placeholder="Password"
           id="password"
+          minLength={8}
+          maxLength={32}
+          pattern="^[!-~]*$"
           required
         ></input>
         <button
