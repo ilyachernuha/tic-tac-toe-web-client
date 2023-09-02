@@ -40,7 +40,7 @@ export function Game({ gameId, gridSize, sign, winningLine }: Game) {
       const nextSquares = squares.slice();
       squares[row][col] = sign;
       setSquares(nextSquares);
-      const cell = String.fromCharCode(97 + col) + String(row + 1);
+      const cell = String.fromCharCode(97 + row) + String(col + 1);
       const state = await makeMove(gameId, cell, token);
       setGameState(state);
     }
@@ -58,8 +58,8 @@ export function Game({ gameId, gridSize, sign, winningLine }: Game) {
     }
     setYourTurn(true);
     const nextSquares = squares.slice();
-    const col = cell[0].charCodeAt(0) - 97;
-    const row = Number(cell.slice(1)) - 1;
+    const row = cell[0].charCodeAt(0) - 97;
+    const col = Number(cell.slice(1)) - 1;
     squares[row][col] = sign === "x" ? "o" : "x";
     setSquares(nextSquares);
   };
