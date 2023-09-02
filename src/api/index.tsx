@@ -2,12 +2,11 @@ import axios from "axios";
 
 const baseUrl = new URL(import.meta.env.VITE_API_URL).origin;
 
-export async function getServerStatus() {
+export async function getServerStatus(): Promise<boolean> {
   try {
     await axios.get(`${baseUrl}/check_availability`);
     return true;
   } catch (error) {
-    console.error(error);
     return false;
   }
 }
@@ -26,8 +25,13 @@ export async function createUser(username: string, password: string) {
     );
     return [false, data?.token];
   } catch (error) {
-    console.error(error);
-    return [true, null];
+    if (axios.isAxiosError(error)) {
+      if (error.code === "ERR_NETWORK") {
+        return ["Server is offline", null];
+      }
+      return [error?.response?.data?.detail, null];
+    }
+    return ["Unexpected error", null];
   }
 }
 
@@ -45,8 +49,13 @@ export async function loginUser(username: string, password: string) {
     );
     return [false, data?.token];
   } catch (error) {
-    console.error(error);
-    return [true, null];
+    if (axios.isAxiosError(error)) {
+      if (error.code === "ERR_NETWORK") {
+        return ["Server is offline", null];
+      }
+      return [error?.response?.data?.detail, null];
+    }
+    return ["Unexpected error", null];
   }
 }
 
@@ -59,7 +68,6 @@ export async function startWaiting(token: string) {
     );
     return [false, true];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -73,7 +81,6 @@ export async function stopWaiting(token: string) {
     );
     return [false, true];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -85,7 +92,6 @@ export async function getWaitingUsers(token: string) {
     });
     return [false, data?.waiting_users];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -109,7 +115,6 @@ export async function sendInvitation(
     );
     return [false, data.invitation_id];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -125,7 +130,6 @@ export async function pollInvitationStatus(
     });
     return [false, { status: data.status, gameId: data?.game_id }];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -148,7 +152,6 @@ export async function getReceivedInvitations(token: string) {
     );
     return [false, invitations];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -165,7 +168,6 @@ export async function acceptInvitation(invitationId: string, token: string) {
     );
     return [false, data?.game_id];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -182,7 +184,6 @@ export async function declineInvitation(invitationId: string, token: string) {
     );
     return [false, data?.detail];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -199,7 +200,6 @@ export async function cancelInvitation(invitationId: string, token: string) {
     );
     return [false, data?.detail];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }
@@ -218,7 +218,6 @@ export async function makeMove(gameId: string, cell: string, token: string) {
     );
     return data?.game_state;
   } catch (error) {
-    console.error(error);
     return null;
   }
 }
@@ -238,7 +237,6 @@ export async function pollGame(gameId: string, token: string) {
       },
     ];
   } catch (error) {
-    console.error(error);
     return [true, null];
   }
 }

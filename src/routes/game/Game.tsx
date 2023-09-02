@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { makeMove, pollGame } from "../../api";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Square {
   value: "x" | "o" | null;
@@ -14,14 +15,15 @@ function Square({ value, onClick }: Square) {
   );
 }
 
-interface GameProps {
+interface Game {
   gameId: string;
   gridSize: number;
+  winningLine: number;
   sign: "x" | "o";
-  token: string;
 }
 
-export function Game({ gameId, gridSize, sign, token }: GameProps) {
+export function Game({ gameId, gridSize, sign, winningLine }: Game) {
+  const { token } = useAuth();
   type Squares = null | "x" | "o";
   const [squares, setSquares] = useState<Squares[][]>(
     new Array(gridSize).fill(null).map(() => new Array(gridSize).fill(null))
@@ -76,6 +78,9 @@ export function Game({ gameId, gridSize, sign, token }: GameProps) {
       <div className="game-info">
         <p>
           Your token: <span>{sign}</span>
+        </p>
+        <p>
+          Winning line: <span>{winningLine}</span>
         </p>
         <p>
           Game state: <span>{gameState}</span>

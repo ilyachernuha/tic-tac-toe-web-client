@@ -1,9 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import {
   getServerStatus,
-  createUser,
-  loginUser,
   startWaiting,
   getWaitingUsers,
   stopWaiting,
@@ -16,91 +14,14 @@ import {
 } from "./api";
 import Layout from "./layouts/Layout";
 import { Game } from "./routes/";
-
-const AuthContext = createContext<any>(null);
-
-const AuthProvider = ({ children }: React.PropsWithChildren) => {
-  const [username, setUsername] = useState<string | null>(null);
-  const [password, setPassword] = useState<string | null>(null);
-  const [token, setToken] = useState(null);
-
-  const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>) => {
-    interface FormDataElements extends HTMLFormControlsCollection {
-      username: HTMLInputElement;
-      password: HTMLInputElement;
-    }
-
-    const elements = event.currentTarget.elements as FormDataElements;
-
-    setUsername(elements.username.value);
-    setPassword(elements.password.value);
-  };
-
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!username) {
-      return console.error("Username is required!");
-    }
-
-    if (!password) {
-      return console.error("Password is required!");
-    }
-
-    const [error, token] = await loginUser(username, password);
-
-    if (error) {
-      return console.error("Error Login");
-    }
-
-    setToken(token);
-  };
-
-  const handleLogout = async () => {
-    setToken(null);
-  };
-
-  const handleRegister = async (event: React.FormEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-
-    if (!username) {
-      return console.error("Username is required!");
-    }
-
-    if (!password) {
-      return console.error("Password is required!");
-    }
-
-    const [error, token] = await createUser(username, password);
-
-    if (error) {
-      return console.error("Error Register");
-    }
-
-    setToken(token);
-  };
-
-  const value = {
-    token,
-    onLogin: handleLogin,
-    onLogout: handleLogout,
-    onRegister: handleRegister,
-    onFormChange: handleFormChange,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-const useAuth = () => {
-  return useContext(AuthContext);
-};
+import { PlayerCard } from "./components/PlayerCard";
+import { InvitationCard } from "./components/InvitationCard";
+import { AuthProvider } from "./providers/AuthProvider";
+import { useAuth } from "./hooks/useAuth";
 
 function App() {
-  const [serverStatus, setServerStatus] = useState(false);
-
   const fetchServerStatus = async () => {
-    const status = await getServerStatus();
-    setServerStatus(status);
+    await getServerStatus();
   };
 
   useEffect(() => {
@@ -111,15 +32,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Layout
-                serverStatus={serverStatus}
-                onClickServerStatus={fetchServerStatus}
-              />
-            }
-          >
+          <Route path="/" element={<Layout />}>
             <Route index element={<Home />}></Route>
           </Route>
         </Routes>
@@ -164,7 +77,7 @@ const Menu = () => {
     playingToken: HTMLSelectElement;
   }
 
-  const onInvite = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const username = form.dataset.username as string;
@@ -177,17 +90,25 @@ const Menu = () => {
       winningLine: Number(winningLine.value),
       status: "pending",
     };
-    const [error, invitationId] = await sendInvitation(invitation, token);
+    const [error, invitationId] = await sendInvitation(
+      invitation as Invitation,
+      token
+    );
     if (error) {
       return console.error("Error sending invitation");
     }
     setSentInvitations([
       ...sentInvitations,
-      { ...invitation, id: invitationId },
+      { ...(invitation as Invitation), id: invitationId },
     ]);
   };
 
-  const onAccept = async ({ id, inviterPlayingX, gridSize }: Invitation) => {
+  const onAccept = async ({
+    id,
+    inviterPlayingX,
+    gridSize,
+    winningLine,
+  }: Invitation) => {
     const [error, gameId] = await acceptInvitation(id as string, token);
     if (error) {
       return console.error("Error accepting invitation");
@@ -196,6 +117,7 @@ const Menu = () => {
       id: gameId,
       playingX: !inviterPlayingX,
       gridSize: gridSize,
+      winningLine: winningLine,
     });
   };
 
@@ -209,7 +131,7 @@ const Menu = () => {
     ]);
   };
 
-  const onCancel = async (invitationId: string) => {
+  const handleCancel = async (invitationId: string) => {
     const [error] = await cancelInvitation(invitationId, token);
     if (error) {
       return console.error("Error canceling invitation");
@@ -242,6 +164,7 @@ const Menu = () => {
       id: invitation.gameId as any,
       playingX: invitation.inviterPlayingX,
       gridSize: invitation.gridSize,
+      winningLine: invitation.winningLine,
     });
   };
 
@@ -264,8 +187,8 @@ const Menu = () => {
       <Game
         gameId={game.id}
         gridSize={game.gridSize}
+        winningLine={game.winningLine}
         sign={game.playingX ? "x" : "o"}
-        token={token}
       />
     );
 
@@ -276,47 +199,11 @@ const Menu = () => {
         {waitingUsers.length === 0 && <p>No waiting users</p>}
         <ul>
           {waitingUsers.map((username) => (
-            <li className="card margin-block-5" key={username}>
-              <h2 className="heading-3 margin-block-end-5">{username}</h2>
-              <form data-username={username} onSubmit={onInvite}>
-                <div className="card-inputs">
-                  <label htmlFor="gridSize">
-                    Grid size:
-                    <input
-                      name="gridSize"
-                      type="number"
-                      min="3"
-                      max="15"
-                      defaultValue="3"
-                      required
-                    />
-                  </label>
-                  <label htmlFor="winningLine">
-                    Winning line:
-                    <input
-                      name="winningLine"
-                      type="number"
-                      min="3"
-                      max="15"
-                      defaultValue="3"
-                      required
-                    />
-                  </label>
-                  <label htmlFor="playingToken">
-                    Token:
-                    <select name="playingToken" defaultValue="x" required>
-                      <option value="x">X</option>
-                      <option value="o">O</option>
-                    </select>
-                  </label>
-                </div>
-                <div>
-                  <button className="button" type="submit" data-type="primary">
-                    Invite
-                  </button>
-                </div>
-              </form>
-            </li>
+            <PlayerCard
+              key={username}
+              name={username}
+              onInvite={handleInvite}
+            />
           ))}
         </ul>
       </div>
@@ -334,35 +221,16 @@ const Menu = () => {
         {sentInvitations.length === 0 && <p>No sent invitations</p>}
         <ul>
           {sentInvitations.map((invitation) => (
-            <li className="card margin-block-5" key={invitation.id}>
-              <h2 className="card__heading">{invitation.inviter}</h2>
-              <div>
-                <p>Grid size: {invitation.gridSize}</p>
-                <p>Winning line: {invitation.winningLine}</p>
-                <p>Your symbol: {invitation.inviterPlayingX ? "X" : "O"}</p>
-                <p>Status: {invitation.status}</p>
-              </div>
-              <div>
-                {invitation.status === "pending" && (
-                  <button
-                    className="button"
-                    data-type="accent"
-                    onClick={() => onCancel(invitation.id as string)}
-                  >
-                    Cancel
-                  </button>
-                )}
-                {invitation.status === "accepted" && (
-                  <button
-                    className="button"
-                    data-type="primary"
-                    onClick={() => handlePlay(invitation)}
-                  >
-                    Play
-                  </button>
-                )}
-              </div>
-            </li>
+            <InvitationCard
+              key={invitation.id}
+              inviter={invitation.inviter}
+              gridSize={invitation.gridSize}
+              winningLine={invitation.winningLine}
+              token={invitation.inviterPlayingX ? "x" : "o"}
+              status={invitation.status}
+              onPlay={() => handlePlay(invitation)}
+              onCancel={() => handleCancel(invitation.id as string)}
+            />
           ))}
         </ul>
       </div>
@@ -403,11 +271,14 @@ const Menu = () => {
 };
 
 const LoginForm = () => {
-  const { onLogin, onRegister, onFormChange } = useAuth();
+  const { onLogin, onRegister, onFormChange, error } = useAuth();
   return (
     <div className="section container login-form">
-      <h1 className="heading-3 margin-block-end-5">Login into account</h1>
+      <h1 className="heading-3 margin-block-end-5 text-center">
+        Log into account
+      </h1>
       <form className="form-group" onSubmit={onLogin} onChange={onFormChange}>
+        <p className="form-error text-center">{error}</p>
         <input
           type="text"
           name="username"
@@ -436,9 +307,9 @@ const LoginForm = () => {
         >
           Login
         </button>
-        <a className="button" onClick={onRegister}>
+        <button className="button" data-type="secondary" onClick={onRegister}>
           Create an account
-        </a>
+        </button>
       </form>
     </div>
   );

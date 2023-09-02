@@ -25,6 +25,14 @@
     }
   }
 
+  &[data-type="secondary"] {
+    color: $button-accent-background;
+    background-color: transparent;
+    &:is(:hover, :focus) {
+      color: $button-accent-background-hover;
+    }
+  }
+
   &[data-type="primary"] {
     background-color: $button-primary-background;
     color: $button-primary-color;
