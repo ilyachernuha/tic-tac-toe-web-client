@@ -1,7 +1,7 @@
 import { useAuth } from "../../hooks/useAuth";
 
 export const LoginForm = () => {
-  const { onLogin, onRegister, onFormChange, error } = useAuth();
+  const { onLogin, onRegister, onFormChange, error, loginPushed } = useAuth();
   return (
     <div className="section container login-form">
       <h1 className="heading-3 margin-block-end-5 text-center">
@@ -31,7 +31,7 @@ export const LoginForm = () => {
         ></input>
         <button
           className="button"
-          data-type="accent"
+          data-type={loginPushed ? "accent-pushed" : "accent"}
           type="submit"
           onClick={onLogin}
         >

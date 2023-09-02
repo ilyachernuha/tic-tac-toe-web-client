@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [password, setPassword] = useState<string | null>(null);
   const [token, setToken] = useState(null);
   const [error, setError] = useState<string | null>(null);
+  const [loginPushed, setLoginPushed] = useState<boolean>(false);
 
   const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>) => {
     interface FormDataElements extends HTMLFormControlsCollection {
@@ -31,10 +32,14 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       return setError("Password is required");
     }
 
+    setLoginPushed(true);
+
     const [error, token] = await loginUser(username, password);
 
+    setLoginPushed(false);
+
     if (error) {
-      setError(error);
+      return setError(error);
     }
 
     setToken(token);
@@ -67,6 +72,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const value = {
     token,
     error: error,
+    loginPushed: loginPushed,
     onLogin: handleLogin,
     onLogout: handleLogout,
     onRegister: handleRegister,
