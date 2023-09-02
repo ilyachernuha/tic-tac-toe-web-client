@@ -26,7 +26,7 @@ export const Menu = ({ setGame }: Menu) => {
     setGame,
   });
 
-  const noWaitingUsers = waitingUsers.length === 0;
+  const noWaitingUsers = waitingUsers.length < 2;
   const waitingUsersElements = waitingUsers.map((name) => {
     if (name === username) return;
     return <PlayerCard key={name} name={name} onInvite={handleInvite} />;
