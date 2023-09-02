@@ -3,9 +3,10 @@
 .card {
   list-style: none;
   display: flex;
-  gap: $card-flow-spacing;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: $card-flow-spacing;
   padding: $card-padding;
   background-color: $card-background-default;
   font-family: $card-font-family;
@@ -35,6 +36,7 @@
 
   form {
     display: flex;
+    flex-wrap: wrap;
     gap: 2rem;
     align-items: center;
     justify-content: space-between;

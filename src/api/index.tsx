@@ -66,9 +66,9 @@ export async function startWaiting(token: string) {
       {},
       { headers: { Authorization: "Bearer " + token } }
     );
-    return [false, true];
+    return false;
   } catch (error) {
-    return [true, null];
+    return true;
   }
 }
 
@@ -139,7 +139,6 @@ export async function getSentInvitations(token: string) {
     const { data } = await axios.get(`${baseUrl}/get_sent_invitations`, {
       headers: { Authorization: "Bearer " + token },
     });
-    console.log(data.sent_invitations);
     const invitations = data.sent_invitations.map(
       ({
         invitation_id,
@@ -248,9 +247,9 @@ export async function makeMove(gameId: string, cell: string, token: string) {
         headers: { Authorization: "Bearer " + token },
       }
     );
-    return data?.game_state;
+    return [null, data?.game_state];
   } catch (error) {
-    return null;
+    return [true, null];
   }
 }
 
@@ -283,6 +282,8 @@ const api = {
   sendInvitation,
   startWaiting,
   stopWaiting,
+  makeMove,
+  pollGame,
 };
 
 export default api;

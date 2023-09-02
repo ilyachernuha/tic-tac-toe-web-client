@@ -7,13 +7,18 @@ interface useMenu {
 }
 
 export const useMenu = ({ setGame }: useMenu) => {
-  const { token } = useAuth();
+  const { token, onLogout } = useAuth();
 
   const [waitingUsers, setWaitingUsers] = useState<string[]>([]);
   const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
   const [receivedInvitations, setReceivedInvitations] = useState<Invitation[]>(
     []
   );
+
+  const startWaiting = async () => {
+    const error = await api.startWaiting(token);
+    if (error) onLogout();
+  };
 
   const fetchWaitingUsers = async () => {
     const [error, waitingUsers] = await api.getWaitingUsers(token);
@@ -98,12 +103,12 @@ export const useMenu = ({ setGame }: useMenu) => {
       fetchReceivedInvitations();
       fetchSentIvitations();
     }, 2000);
-    api.startWaiting(token).then();
+    startWaiting();
     fetchWaitingUsers();
     fetchReceivedInvitations();
     fetchSentIvitations();
     return () => {
-      api.stopWaiting(token).then();
+      api.stopWaiting(token);
       clearInterval(pollingInterval);
     };
   }, []);

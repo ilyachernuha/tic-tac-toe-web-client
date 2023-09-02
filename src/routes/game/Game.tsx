@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { makeMove, pollGame } from "../../api";
+import api from "../../api";
 import { useAuth } from "../../hooks/useAuth";
 
 interface Square {
@@ -36,18 +36,19 @@ export function Game({ gameId, gridSize, sign, winningLine }: Game) {
       return;
     }
     if (yourTurn && gameState === "ongoing") {
+      const cell = String.fromCharCode(97 + row) + String(col + 1);
+      const [error, state] = await api.makeMove(gameId, cell, token);
+      if (error) return;
       setYourTurn(false);
       const nextSquares = squares.slice();
       squares[row][col] = sign;
       setSquares(nextSquares);
-      const cell = String.fromCharCode(97 + row) + String(col + 1);
-      const state = await makeMove(gameId, cell, token);
       setGameState(state);
     }
   };
 
   const fetchGame = async () => {
-    const [error, data] = await pollGame(gameId, token);
+    const [error, data] = await api.pollGame(gameId, token);
     if (error) {
       return console.error(error);
     }
@@ -83,6 +84,9 @@ export function Game({ gameId, gridSize, sign, winningLine }: Game) {
         </p>
         <p>
           Game state: <span>{gameState}</span>
+        </p>
+        <p>
+          {yourTurn ? "Choose your next move" : "Waiting for opponent to move"}
         </p>
       </div>
       <div className="game-board">

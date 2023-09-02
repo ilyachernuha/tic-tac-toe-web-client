@@ -77,13 +77,13 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
   const value = {
     token: cookies.jwt_token,
+    username: cookies.username,
     error: error,
     loginPushed: loginPushed,
     onLogin: handleLogin,
     onLogout: handleLogout,
     onRegister: handleRegister,
     onFormChange: handleFormChange,
-    username: username,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
