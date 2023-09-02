@@ -2,7 +2,10 @@
 
 .card {
   list-style: none;
+  display: flex;
   gap: $card-flow-spacing;
+  justify-content: space-between;
+  align-items: center;
   padding: $card-padding;
   background-color: $card-background-default;
   font-family: $card-font-family;
@@ -13,6 +16,16 @@
 
   &__heading {
     @include heading($card-heading-font-size, $card-heading-color-default);
+  }
+
+  &__description {
+    display: flex;
+    gap: 0.5rem 2rem;
+    flex-wrap: wrap;
+    span {
+      text-transform: uppercase;
+      font-weight: bold;
+    }
   }
 
   &__buttons {

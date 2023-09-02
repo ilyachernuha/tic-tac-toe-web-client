@@ -1,1 +1,1 @@
-export { InvitationCard } from "./InvitationCard";
+export { ReceivedInvitationCard, SentInvitationCard } from "./InvitationCard";

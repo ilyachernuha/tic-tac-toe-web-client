@@ -8,7 +8,10 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [password, setPassword] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loginPushed, setLoginPushed] = useState<boolean>(false);
-  const [cookies, setCookie, removeCookie] = useCookies(["jwt_token"]);
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "jwt_token",
+    "username",
+  ]);
 
   const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>) => {
     interface FormDataElements extends HTMLFormControlsCollection {
@@ -44,10 +47,12 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
     }
 
     setCookie("jwt_token", token);
+    setCookie("username", username);
   };
 
   const handleLogout = async () => {
     removeCookie("jwt_token");
+    removeCookie("username");
   };
 
   const handleRegister = async (event: React.FormEvent<HTMLButtonElement>) => {
@@ -66,8 +71,8 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
     if (error) {
       setError(error);
     }
-
     setCookie("jwt_token", token);
+    setCookie("username", username);
   };
 
   const value = {

@@ -1,7 +1,8 @@
 interface Invitation {
-  id?: string;
-  gameId?: string;
+  id: string;
+  gameId: string;
   inviter: string;
+  invited: string;
   gridSize: number;
   winningLine: number;
   inviterPlayingX: boolean;
@@ -14,3 +15,4 @@ interface Game {
   playingX: boolean;
   winningLine: number;
 }
+

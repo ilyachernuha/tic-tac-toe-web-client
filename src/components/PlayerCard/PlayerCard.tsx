@@ -6,7 +6,7 @@ interface PlayerCard {
 export const PlayerCard = ({ name, onInvite }: PlayerCard) => {
   return (
     <li className="card margin-block-5">
-      <h2 className="heading-3 margin-block-end-5">{name}</h2>
+      <h2 className="card__heading">{name}</h2>
       <form data-username={name} onSubmit={onInvite}>
         <div className="card-inputs">
           <label htmlFor="gridSize">
@@ -34,7 +34,7 @@ export const PlayerCard = ({ name, onInvite }: PlayerCard) => {
             />
           </label>
           <label htmlFor="playingToken">
-            Token:
+            Your token:
             <select
               name="playingToken"
               id="playingToken"

@@ -97,14 +97,14 @@ export async function getWaitingUsers(token: string) {
 }
 
 export async function sendInvitation(
-  { inviter, inviterPlayingX, gridSize, winningLine }: Invitation,
+  { invited, inviterPlayingX, gridSize, winningLine }: Invitation,
   token: string
 ) {
   try {
     const { data } = await axios.post(
       `${baseUrl}/invite`,
       {
-        invited: inviter,
+        invited: invited,
         grid_properties: {
           size: gridSize,
           winning_line: winningLine,
@@ -129,6 +129,38 @@ export async function pollInvitationStatus(
       params: { invitation_id: invitationId },
     });
     return [false, { status: data.status, gameId: data?.game_id }];
+  } catch (error) {
+    return [true, null];
+  }
+}
+
+export async function getSentInvitations(token: string) {
+  try {
+    const { data } = await axios.get(`${baseUrl}/get_sent_invitations`, {
+      headers: { Authorization: "Bearer " + token },
+    });
+    console.log(data.sent_invitations);
+    const invitations = data.sent_invitations.map(
+      ({
+        invitation_id,
+        inviter_playing_x,
+        grid_properties,
+        status,
+        invited,
+        game_id,
+      }: any) => {
+        return {
+          id: invitation_id,
+          inviterPlayingX: inviter_playing_x,
+          gridSize: grid_properties.size,
+          winningLine: grid_properties.winning_line,
+          status: status,
+          invited: invited,
+          gameId: game_id,
+        };
+      }
+    );
+    return [false, invitations];
   } catch (error) {
     return [true, null];
   }
@@ -240,3 +272,17 @@ export async function pollGame(gameId: string, token: string) {
     return [true, null];
   }
 }
+
+const api = {
+  acceptInvitation,
+  cancelInvitation,
+  declineInvitation,
+  getReceivedInvitations,
+  getSentInvitations,
+  getWaitingUsers,
+  sendInvitation,
+  startWaiting,
+  stopWaiting,
+};
+
+export default api;
