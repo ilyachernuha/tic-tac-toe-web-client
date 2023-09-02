@@ -27,22 +27,26 @@ export const Menu = ({ setGame }: Menu) => {
   });
 
   const noWaitingUsers = waitingUsers.length === 0;
-  const waitingUsersElements = waitingUsers.map((username) => (
-    <PlayerCard key={username} name={username} onInvite={handleInvite} />
-  ));
+  const waitingUsersElements = waitingUsers.map((name) => {
+    if (name === username) return;
+    return <PlayerCard key={name} name={name} onInvite={handleInvite} />;
+  });
   const noSentInvitations = sentInvitations.length === 0;
-  const sentInvitationsElements = sentInvitations.map((invitation) => (
-    <SentInvitationCard
-      key={invitation.id}
-      invited={invitation.invited}
-      gridSize={invitation.gridSize}
-      winningLine={invitation.winningLine}
-      token={invitation.inviterPlayingX ? "x" : "o"}
-      status={invitation.status}
-      onPlay={() => handlePlay(invitation)}
-      onCancel={() => handleCancel(invitation.id)}
-    />
-  ));
+  const sentInvitationsElements = sentInvitations.map((invitation) => {
+    if (invitation.status === "cancelled") return;
+    return (
+      <SentInvitationCard
+        key={invitation.id}
+        invited={invitation.invited}
+        gridSize={invitation.gridSize}
+        winningLine={invitation.winningLine}
+        token={invitation.inviterPlayingX ? "x" : "o"}
+        status={invitation.status}
+        onPlay={() => handlePlay(invitation)}
+        onCancel={() => handleCancel(invitation.id)}
+      />
+    );
+  });
 
   const noReceivedInvitations = receivedInvitations.length === 0;
   const receivedInvitationsElements = receivedInvitations.map(

@@ -6,7 +6,7 @@ interface Invitation {
   gridSize: number;
   winningLine: number;
   inviterPlayingX: boolean;
-  status: "pending" | "accepted" | "declined";
+  status: "pending" | "accepted" | "declined" | "cancelled";
 }
 
 interface Game {
@@ -15,4 +15,3 @@ interface Game {
   playingX: boolean;
   winningLine: number;
 }
-
