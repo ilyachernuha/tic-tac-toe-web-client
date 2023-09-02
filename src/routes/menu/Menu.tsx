@@ -19,7 +19,7 @@ interface Menu {
 }
 
 export const Menu = ({ setGame }: Menu) => {
-  const { token } = useAuth();
+  const { token, username, onLogout } = useAuth();
 
   const [waitingUsers, setWaitingUsers] = useState<string[]>([]);
   const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
@@ -144,7 +144,7 @@ export const Menu = ({ setGame }: Menu) => {
     const pollingInterval = setInterval(() => {
       fetchWaitingUsers();
       fetchInvitations();
-    }, 1000);
+    }, 5000);
     startWaiting(token).then();
     fetchWaitingUsers();
     fetchInvitations();
@@ -158,7 +158,13 @@ export const Menu = ({ setGame }: Menu) => {
     return (
       <>
         <div className="section container">
-          <h1 className="heading-3">Players Online</h1>
+          <h2>Your username: {username}</h2>
+          <button className="button" data-type="accent" onClick={onLogout}>
+            Log Out
+          </button>
+        </div>
+        <div className="section container">
+          <h2 className="heading-3">Players Online</h2>
           {waitingUsers.length === 0 && <p>No waiting users</p>}
           <ul>
             {waitingUsers.map((username) => (
@@ -172,7 +178,7 @@ export const Menu = ({ setGame }: Menu) => {
         </div>
         <div className="section container">
           <div className="section-header">
-            <h1 className="heading-3">Sent Invitations</h1>
+            <h2 className="heading-3">Sent Invitations</h2>
             <button
               className="button"
               data-type="primary"
@@ -198,7 +204,7 @@ export const Menu = ({ setGame }: Menu) => {
           </ul>
         </div>
         <div className="section container">
-          <h1 className="heading-3">Received Invitations</h1>
+          <h2 className="heading-3">Received Invitations</h2>
           {receivedInvitations.length === 0 && <p>No recieved invitations</p>}
           <ul>
             {receivedInvitations.map((invitation: Invitation) => (

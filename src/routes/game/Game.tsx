@@ -65,7 +65,7 @@ export function Game({ gameId, gridSize, sign, winningLine }: Game) {
   };
 
   useEffect(() => {
-    const pollingInterval = setInterval(fetchGame, 1000);
+    const pollingInterval = setInterval(fetchGame, 2000);
     fetchGame();
 
     return () => {

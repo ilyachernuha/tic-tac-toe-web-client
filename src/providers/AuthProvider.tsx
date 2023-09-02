@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { createUser, loginUser } from "../api";
 import { AuthContext } from "../contexts/AuthContext";
+import { useCookies } from "react-cookie";
 
 export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [username, setUsername] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
-  const [token, setToken] = useState(null);
   const [error, setError] = useState<string | null>(null);
   const [loginPushed, setLoginPushed] = useState<boolean>(false);
+  const [cookies, setCookie, removeCookie] = useCookies(["jwt_token"]);
 
   const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>) => {
     interface FormDataElements extends HTMLFormControlsCollection {
@@ -42,11 +43,11 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       return setError(error);
     }
 
-    setToken(token);
+    setCookie("jwt_token", token);
   };
 
   const handleLogout = async () => {
-    setToken(null);
+    removeCookie("jwt_token");
   };
 
   const handleRegister = async (event: React.FormEvent<HTMLButtonElement>) => {
@@ -66,17 +67,18 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       setError(error);
     }
 
-    setToken(token);
+    setCookie("jwt_token", token);
   };
 
   const value = {
-    token,
+    token: cookies.jwt_token,
     error: error,
     loginPushed: loginPushed,
     onLogin: handleLogin,
     onLogout: handleLogout,
     onRegister: handleRegister,
     onFormChange: handleFormChange,
+    username: username,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
