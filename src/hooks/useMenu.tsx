@@ -35,6 +35,21 @@ export const useMenu = ({ setGame }: useMenu) => {
   const fetchSentIvitations = async () => {
     const [error, invitations] = await api.getSentInvitations(token);
     if (error) return;
+    // const responses = await Promise.all(
+    //   invitations.map((invitation: Invitation) => {
+    //     if (invitation.gameId) {
+    //       return api.pollGame(invitation.gameId, token);
+    //     }
+    //   })
+    // );
+    // const cringeInvitations = invitations.map(
+    //   (invitation: Invitation, index: number) => {
+    //     if (responses[index]) {
+    //       invitation.status = responses[index][1].state;
+    //     }
+    //     return invitation;
+    //   }
+    // );
     setSentInvitations(invitations);
   };
 
