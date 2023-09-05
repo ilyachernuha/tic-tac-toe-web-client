@@ -15,4 +15,12 @@
       justify-content: $site-header-jusitifcation-large-screens;
     }
   }
+
+  &__username {
+    @include heading(
+      $heading-3-font-size,
+      $heading-3-color,
+      $heading-text-transform: none
+    );
+  }
 }

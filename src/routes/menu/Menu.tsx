@@ -59,7 +59,7 @@ export const Menu = ({ setGame }: Menu) => {
     <>
       <header className="site-header">
         <div className="site-header__inner container">
-          <h2 className="heading-3">Logged as {username}</h2>
+          <h2 className="site-header__username">Logged as {username}</h2>
           <button className="button" data-type="accent" onClick={onLogout}>
             Log Out
           </button>

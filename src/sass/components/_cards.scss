@@ -20,7 +20,11 @@
   border-radius: $card-border-radius;
 
   &__heading {
-    @include heading($card-heading-font-size, $card-heading-color-default);
+    @include heading(
+      $card-heading-font-size,
+      $card-heading-color-default,
+      $heading-text-transform: none
+    );
   }
 
   &__description {

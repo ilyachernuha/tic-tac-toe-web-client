@@ -115,13 +115,13 @@ export function Game({
           Playing against: <span>{opponent}</span>
         </p>
         <p>
-          Your token: <span>{token}</span>
+          Your token: <span className="uppercase">{token}</span>
         </p>
         <p>
           Winning line: <span>{winningLine}</span>
         </p>
         <p>
-          Game state: <span>{state}</span>
+          Game state: <span className="uppercase">{state}</span>
         </p>
         <p>
           <span>{turn}</span>
