@@ -109,11 +109,8 @@ export function Game({
     (isYourTurn ? "Choose your next move" : "Waiting for opponent to move");
 
   return (
-    <div className="game section container">
+    <div className="game container">
       <div className="game-info">
-        <p>
-          Game: <span>{id}</span>
-        </p>
         <p>
           Playing against: <span>{opponent}</span>
         </p>
