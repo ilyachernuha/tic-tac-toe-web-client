@@ -1,24 +1,18 @@
 interface InvitationCard {
-  gridSize: number;
-  winningLine: number;
+  invitation: Invitation;
   token: "x" | "o";
-  status: "pending" | "accepted" | "declined" | "cancelled";
 }
 
 interface SentInvitationCard extends InvitationCard {
-  invited: string;
   onPlay: () => void;
   onCancel: () => void;
 }
 
 export const SentInvitationCard = ({
-  gridSize,
-  winningLine,
+  invitation: { gridSize, winningLine, status, invited },
   token,
-  status,
-  invited,
-  onCancel,
   onPlay,
+  onCancel,
 }: SentInvitationCard) => {
   return (
     <li className="card margin-block-5">
@@ -62,16 +56,13 @@ export const SentInvitationCard = ({
 };
 
 interface ReceivedInvitationCard extends InvitationCard {
-  inviter: string;
   onAccept: () => void;
   onDecline: () => void;
 }
 
 export const ReceivedInvitationCard = ({
-  gridSize,
-  winningLine,
+  invitation: { gridSize, winningLine, inviter },
   token,
-  inviter,
   onAccept,
   onDecline,
 }: ReceivedInvitationCard) => {

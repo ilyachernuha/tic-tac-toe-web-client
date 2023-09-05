@@ -36,11 +36,8 @@ export const Menu = ({ setGame }: Menu) => {
     return (
       <SentInvitationCard
         key={invitation.id}
-        invited={invitation.invited}
-        gridSize={invitation.gridSize}
-        winningLine={invitation.winningLine}
+        invitation={invitation}
         token={invitation.inviterPlayingX ? "x" : "o"}
-        status={invitation.status}
         onPlay={() => handlePlay(invitation)}
         onCancel={() => handleCancel(invitation.id)}
       />
@@ -48,20 +45,15 @@ export const Menu = ({ setGame }: Menu) => {
   });
 
   const noReceivedInvitations = receivedInvitations.length === 0;
-  const receivedInvitationsElements = receivedInvitations.map(
-    (invitation: Invitation) => (
-      <ReceivedInvitationCard
-        key={invitation.id}
-        inviter={invitation.inviter}
-        gridSize={invitation.gridSize}
-        winningLine={invitation.winningLine}
-        token={invitation.inviterPlayingX ? "o" : "x"}
-        status={invitation.status}
-        onAccept={() => handleAccept(invitation)}
-        onDecline={() => handleDecline(invitation.id)}
-      />
-    )
-  );
+  const receivedInvitationsElements = receivedInvitations.map((invitation) => (
+    <ReceivedInvitationCard
+      key={invitation.id}
+      invitation={invitation}
+      token={invitation.inviterPlayingX ? "o" : "x"}
+      onAccept={() => handleAccept(invitation)}
+      onDecline={() => handleDecline(invitation.id)}
+    />
+  ));
 
   return (
     <>
