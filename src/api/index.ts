@@ -278,8 +278,8 @@ export async function pollGame(
       params: { game_id: gameId },
     });
     return {
-      newMove: data.new_move,
-      state: data.game_state,
+      newMove: data?.new_move,
+      state: data?.game_state,
       cell: data?.cell,
     };
   } catch (error) {

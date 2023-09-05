@@ -20,7 +20,7 @@ type Game = {
 };
 
 type PollGameResponse = {
-  cell: string;
-  newMove: string;
+  newMove: boolean;
   state: Game["state"];
+  cell?: string;
 };

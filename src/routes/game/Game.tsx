@@ -45,10 +45,8 @@ interface GameProps {
   setGame: any;
 }
 
-export function Game({
-  game: { token, grid, id, isYourTurn, opponent, winningLine, state },
-  setGame,
-}: GameProps) {
+export function Game({ game, setGame }: GameProps) {
+  const { token, grid, id, isYourTurn, opponent, winningLine, state } = game;
   const { authToken } = useAuth();
 
   const handleClick = async (row: number, col: number) => {
@@ -61,13 +59,11 @@ export function Game({
         const state = await api.makeMove(id, cell, authToken);
         const nextGrid = grid.slice();
         nextGrid[row][col] = token;
-        setGame((prevGame: Game) => {
-          return {
-            ...prevGame,
-            isYourTurn: false,
-            grid: nextGrid,
-            state: state,
-          };
+        setGame({
+          ...game,
+          state: state,
+          grid: nextGrid,
+          isYourTurn: false,
         });
       } catch (error) {}
     }
@@ -76,29 +72,24 @@ export function Game({
   const pollGame = async () => {
     try {
       const { newMove, state, cell } = await api.pollGame(id, authToken);
-      const nextGrid = grid.slice();
-      let nextIsYourTurn = isYourTurn;
-
-      if (newMove) {
+      if (newMove && cell) {
+        const nextGrid = grid.slice();
         const row = cell[0].charCodeAt(0) - 97;
         const col = Number(cell.slice(1)) - 1;
         nextGrid[row][col] = token === "x" ? "o" : "x";
-        nextIsYourTurn = true;
-      }
-
-      setGame((prevGame: Game) => {
-        return {
-          ...prevGame,
+        setGame({
+          ...game,
           state: state,
           grid: nextGrid,
-          isYourTurn: nextIsYourTurn,
-        };
-      });
+          isYourTurn: true,
+        });
+      }
     } catch (error) {}
   };
 
   useEffect(() => {
     const pollingInterval = setInterval(pollGame, 2000);
+    pollGame();
     return () => {
       clearInterval(pollingInterval);
     };
