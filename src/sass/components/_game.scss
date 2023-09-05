@@ -4,10 +4,10 @@
   height: 100%;
   display: grid;
   place-content: center;
-  align-items: center;
 }
 
 .game-info {
+  position: absolute;
   span {
     font-weight: bold;
     text-transform: uppercase;

@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import api from "../../api";
 import { useAuth } from "../../hooks/useAuth";
 
 interface Square {
-  value: "x" | "o" | null;
+  value: "x" | "o" | "";
   onClick: () => void;
 }
 
@@ -15,95 +15,122 @@ function Square({ value, onClick }: Square) {
   );
 }
 
-interface Game {
-  gameId: string;
-  gridSize: number;
-  winningLine: number;
-  sign: "x" | "o";
+interface Board {
+  grid: Game["grid"];
+  onClick: (row: number, col: number) => void;
 }
 
-export function Game({ gameId, gridSize, sign, winningLine }: Game) {
-  const { token } = useAuth();
-  type Squares = null | "x" | "o";
-  const [squares, setSquares] = useState<Squares[][]>(
-    new Array(gridSize).fill(null).map(() => new Array(gridSize).fill(null))
+function Board({ grid, onClick }: Board) {
+  return (
+    <div className="game-board">
+      {grid.map((row, rowIndex) => (
+        <div className="board-row" key={rowIndex}>
+          {row.map((square, colIndex) => (
+            <Square
+              key={String(rowIndex) + String(colIndex)}
+              value={square}
+              onClick={() => {
+                onClick(rowIndex, colIndex);
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
   );
-  const [yourTurn, setYourTurn] = useState<boolean>(sign == "x" ? true : false);
-  const [gameState, setGameState] = useState("ongoing");
+}
+
+interface GameProps {
+  game: Game;
+  setGame: any;
+}
+
+export function Game({
+  game: { token, grid, id, isYourTurn, opponent, winningLine, state },
+  setGame,
+}: GameProps) {
+  const { authToken } = useAuth();
 
   const handleClick = async (row: number, col: number) => {
-    if (squares[row][col]) {
+    if (grid[row][col]) {
       return;
     }
-    if (yourTurn && gameState === "ongoing") {
-      const cell = String.fromCharCode(97 + row) + String(col + 1);
-      const [error, state] = await api.makeMove(gameId, cell, token);
-      if (error) return;
-      setYourTurn(false);
-      const nextSquares = squares.slice();
-      squares[row][col] = sign;
-      setSquares(nextSquares);
-      setGameState(state);
+    if (isYourTurn && state === "ongoing") {
+      try {
+        const cell = String.fromCharCode(97 + row) + String(col + 1);
+        const state = await api.makeMove(id, cell, authToken);
+        const nextGrid = grid.slice();
+        nextGrid[row][col] = token;
+        setGame((prevGame: Game) => {
+          return {
+            ...prevGame,
+            isYourTurn: false,
+            grid: nextGrid,
+            state: state,
+          };
+        });
+      } catch (error) {}
     }
   };
 
-  const fetchGame = async () => {
-    const [error, data] = await api.pollGame(gameId, token);
-    if (error) {
-      return console.error(error);
-    }
-    const { newMove, state, cell } = data as any;
-    setGameState(state);
-    if (!newMove) {
-      return;
-    }
-    setYourTurn(true);
-    const nextSquares = squares.slice();
-    const row = cell[0].charCodeAt(0) - 97;
-    const col = Number(cell.slice(1)) - 1;
-    squares[row][col] = sign === "x" ? "o" : "x";
-    setSquares(nextSquares);
+  const pollGame = async () => {
+    try {
+      const { newMove, state, cell } = await api.pollGame(id, authToken);
+      const nextGrid = grid.slice();
+      let nextIsYourTurn = isYourTurn;
+
+      if (newMove) {
+        const row = cell[0].charCodeAt(0) - 97;
+        const col = Number(cell.slice(1)) - 1;
+        nextGrid[row][col] = token === "x" ? "o" : "x";
+        nextIsYourTurn = true;
+      }
+
+      setGame((prevGame: Game) => {
+        return {
+          ...prevGame,
+          state: state,
+          grid: nextGrid,
+          isYourTurn: nextIsYourTurn,
+        };
+      });
+    } catch (error) {}
   };
 
   useEffect(() => {
-    const pollingInterval = setInterval(fetchGame, 2000);
-    fetchGame();
+    const pollingInterval = setInterval(pollGame, 2000);
     return () => {
       clearInterval(pollingInterval);
     };
   }, []);
 
+  const turn =
+    state === "ongoing" &&
+    (isYourTurn ? "Choose your next move" : "Waiting for opponent to move");
+
   return (
-    <div className="game">
+    <div className="game section container">
       <div className="game-info">
         <p>
-          Your token: <span>{sign}</span>
+          Game: <span>{id}</span>
+        </p>
+        <p>
+          Playing against: <span>{opponent}</span>
+        </p>
+        <p>
+          Your token: <span>{token}</span>
         </p>
         <p>
           Winning line: <span>{winningLine}</span>
         </p>
         <p>
-          Game state: <span>{gameState}</span>
+          Game state: <span>{state}</span>
         </p>
         <p>
-          {yourTurn ? "Choose your next move" : "Waiting for opponent to move"}
+          <span>{turn}</span>
         </p>
       </div>
-      <div className="game-board">
-        {squares.map((row, rowIndex) => (
-          <div className="board-row" key={rowIndex}>
-            {row.map((square, colIndex) => (
-              <Square
-                key={String(rowIndex) + String(colIndex)}
-                value={square}
-                onClick={() => {
-                  handleClick(rowIndex, colIndex);
-                }}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
+      <Board grid={grid} onClick={handleClick} />
     </div>
   );
 }

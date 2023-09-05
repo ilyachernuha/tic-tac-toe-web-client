@@ -7,7 +7,7 @@ interface useMenu {
 }
 
 export const useMenu = ({ setGame }: useMenu) => {
-  const { token, onLogout } = useAuth();
+  const { authToken } = useAuth();
 
   const [waitingUsers, setWaitingUsers] = useState<string[]>([]);
   const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
@@ -16,41 +16,22 @@ export const useMenu = ({ setGame }: useMenu) => {
   );
 
   const startWaiting = async () => {
-    const error = await api.startWaiting(token);
-    if (error) onLogout();
+    await api.startWaiting(authToken);
   };
 
   const fetchWaitingUsers = async () => {
-    const [error, waitingUsers] = await api.getWaitingUsers(token);
-    if (error) return;
+    const waitingUsers = await api.getWaitingUsers(authToken);
     setWaitingUsers(waitingUsers);
   };
 
   const fetchReceivedInvitations = async () => {
-    const [error, invitations] = await api.getReceivedInvitations(token);
-    if (error) return;
+    const invitations = await api.getReceivedInvitations(authToken);
     setReceivedInvitations(invitations);
   };
 
   const fetchSentIvitations = async () => {
-    const [error, invitations] = await api.getSentInvitations(token);
-    if (error) return;
-    const responses = await Promise.all(
-      invitations.map((invitation: Invitation) => {
-        if (invitation.gameId) {
-          return api.pollGame(invitation.gameId, token);
-        }
-      })
-    );
-    const cringeInvitations = invitations.map(
-      (invitation: Invitation, index: number) => {
-        if (responses[index] && responses[index][1].state !== "ongoing") {
-          invitation.status = responses[index][1].state;
-        }
-        return invitation;
-      }
-    );
-    setSentInvitations(cringeInvitations);
+    const invitations = await api.getSentInvitations(authToken);
+    setSentInvitations(invitations);
   };
 
   interface FormDataElements extends HTMLFormControlsCollection {
@@ -71,45 +52,29 @@ export const useMenu = ({ setGame }: useMenu) => {
       gridSize: Number(gridSize.value),
       winningLine: Number(winningLine.value),
     };
-    await api.sendInvitation(invitation as Invitation, token);
+    await api.sendInvitation(invitation as Invitation, authToken);
     fetchSentIvitations();
   };
 
-  const handleAccept = async ({
-    id,
-    inviterPlayingX,
-    gridSize,
-    winningLine,
-  }: Invitation) => {
-    const [error, gameId] = await api.acceptInvitation(id, token);
-    if (error) return;
-    setGame({
-      id: gameId,
-      playingX: !inviterPlayingX,
-      gridSize: gridSize,
-      winningLine: winningLine,
-    });
+  const handleAccept = async ({ id }: Invitation) => {
+    const gameId = await api.acceptInvitation(id, authToken);
+    const game = await api.getGame(gameId, authToken);
+    setGame(game);
   };
 
   const handleDecline = async (invitationId: string) => {
-    const [error] = await api.declineInvitation(invitationId, token);
-    if (error) return;
+    await api.declineInvitation(invitationId, authToken);
     fetchReceivedInvitations();
   };
 
   const handleCancel = async (invitationId: string) => {
-    const [error] = await api.cancelInvitation(invitationId, token);
-    if (error) return;
+    await api.cancelInvitation(invitationId, authToken);
     fetchSentIvitations();
   };
 
-  const handlePlay = (invitation: Invitation) => {
-    setGame({
-      id: invitation.gameId,
-      playingX: invitation.inviterPlayingX,
-      gridSize: invitation.gridSize,
-      winningLine: invitation.winningLine,
-    });
+  const handlePlay = async ({ gameId }: Invitation) => {
+    const game = await api.getGame(gameId, authToken);
+    setGame(game);
   };
 
   useEffect(() => {
@@ -123,7 +88,7 @@ export const useMenu = ({ setGame }: useMenu) => {
     fetchReceivedInvitations();
     fetchSentIvitations();
     return () => {
-      api.stopWaiting(token);
+      api.stopWaiting(authToken);
       clearInterval(pollingInterval);
     };
   }, []);

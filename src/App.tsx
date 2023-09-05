@@ -33,19 +33,11 @@ function App() {
 const Home = () => {
   const [game, setGame] = useState<Game | null>(null);
 
-  if (game)
-    return (
-      <Game
-        gameId={game.id}
-        gridSize={game.gridSize}
-        winningLine={game.winningLine}
-        sign={game.playingX ? "x" : "o"}
-      />
-    );
+  if (game) return <Game game={game} setGame={setGame} />;
 
-  const { token } = useAuth();
+  const { authToken } = useAuth();
 
-  if (token) return <Menu setGame={setGame} />;
+  if (authToken) return <Menu setGame={setGame} />;
 
   return <LoginForm />;
 };

@@ -38,16 +38,15 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
     setLoginPushed(true);
 
-    const [error, token] = await loginUser(username, password);
-
-    setLoginPushed(false);
-
-    if (error) {
-      return setError(error);
+    try {
+      const token = await loginUser(username, password);
+      setCookie("jwt_token", token);
+      setCookie("username", username);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoginPushed(false);
     }
-
-    setCookie("jwt_token", token);
-    setCookie("username", username);
   };
 
   const handleLogout = async () => {
@@ -66,17 +65,17 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       return setError("Password is required");
     }
 
-    const [error, token] = await createUser(username, password);
-
-    if (error) {
-      setError(error);
+    try {
+      const token = await createUser(username, password);
+      setCookie("jwt_token", token);
+      setCookie("username", username);
+    } catch (error: any) {
+      setError(error.message);
     }
-    setCookie("jwt_token", token);
-    setCookie("username", username);
   };
 
   const value = {
-    token: cookies.jwt_token,
+    authToken: cookies.jwt_token,
     username: cookies.username,
     error: error,
     loginPushed: loginPushed,

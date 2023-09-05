@@ -2,16 +2,18 @@ import axios from "axios";
 
 const baseUrl = new URL(import.meta.env.VITE_API_URL).origin;
 
-export async function getServerStatus(): Promise<boolean> {
+export async function getServerStatus(): Promise<void> {
   try {
     await axios.get(`${baseUrl}/check_availability`);
-    return true;
   } catch (error) {
-    return false;
+    throw new Error();
   }
 }
 
-export async function createUser(username: string, password: string) {
+export async function createUser(
+  username: string,
+  password: string
+): Promise<string> {
   try {
     const { data } = await axios.post(
       `${baseUrl}/create_user`,
@@ -23,19 +25,20 @@ export async function createUser(username: string, password: string) {
         },
       }
     );
-    return [false, data?.token];
+    return data?.token;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.code === "ERR_NETWORK") {
-        return ["Server is offline", null];
-      }
-      return [error?.response?.data?.detail, null];
+      throw new Error(error?.response?.data?.detail);
+    } else {
+      throw new Error("Unexpected error");
     }
-    return ["Unexpected error", null];
   }
 }
 
-export async function loginUser(username: string, password: string) {
+export async function loginUser(
+  username: string,
+  password: string
+): Promise<string> {
   try {
     const { data } = await axios.post(
       `${baseUrl}/login`,
@@ -47,59 +50,62 @@ export async function loginUser(username: string, password: string) {
         },
       }
     );
-    return [false, data?.token];
+    return data?.token;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.code === "ERR_NETWORK") {
-        return ["Server is offline", null];
-      }
-      return [error?.response?.data?.detail, null];
+      throw new Error(error?.response?.data?.detail);
+    } else {
+      throw new Error("Unexpected error");
     }
-    return ["Unexpected error", null];
+    // if (axios.isAxiosError(error)) {
+    //   if (error.code === "ERR_NETWORK") {
+    //     return ["Server is offline", null];
+    //   }
+    //   return [error?.response?.data?.detail, null];
+    // }
+    // return ["Unexpected error", null];
   }
 }
 
-export async function startWaiting(token: string) {
+export async function startWaiting(token: string): Promise<void> {
   try {
     await axios.post(
       `${baseUrl}/start_waiting`,
       {},
       { headers: { Authorization: "Bearer " + token } }
     );
-    return false;
   } catch (error) {
-    return true;
+    throw new Error();
   }
 }
 
-export async function stopWaiting(token: string) {
+export async function stopWaiting(token: string): Promise<void> {
   try {
     await axios.post(
       `${baseUrl}/stop_waiting`,
       {},
       { headers: { Authorization: "Bearer " + token } }
     );
-    return [false, true];
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
-export async function getWaitingUsers(token: string) {
+export async function getWaitingUsers(token: string): Promise<string[]> {
   try {
     const { data } = await axios.get(`${baseUrl}/waiting_users`, {
       headers: { Authorization: "Bearer " + token },
     });
-    return [false, data?.waiting_users];
+    return data?.waiting_users;
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
 export async function sendInvitation(
   { invited, inviterPlayingX, gridSize, winningLine }: Invitation,
   token: string
-) {
+): Promise<Invitation["id"]> {
   try {
     const { data } = await axios.post(
       `${baseUrl}/invite`,
@@ -113,28 +119,28 @@ export async function sendInvitation(
       },
       { headers: { Authorization: "Bearer " + token } }
     );
-    return [false, data.invitation_id];
+    return data?.invitation_id;
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
 export async function pollInvitationStatus(
   invitationId: string,
   token: string
-) {
+): Promise<{ status: Invitation["status"]; gameId: string }> {
   try {
     const { data } = await axios.get(`${baseUrl}/poll_invitation_status`, {
       headers: { Authorization: "Bearer " + token },
       params: { invitation_id: invitationId },
     });
-    return [false, { status: data.status, gameId: data?.game_id }];
+    return { status: data?.status, gameId: data?.game_id };
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
-export async function getSentInvitations(token: string) {
+export async function getSentInvitations(token: string): Promise<Invitation[]> {
   try {
     const { data } = await axios.get(`${baseUrl}/get_sent_invitations`, {
       headers: { Authorization: "Bearer " + token },
@@ -159,13 +165,15 @@ export async function getSentInvitations(token: string) {
         };
       }
     );
-    return [false, invitations];
+    return invitations;
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
-export async function getReceivedInvitations(token: string) {
+export async function getReceivedInvitations(
+  token: string
+): Promise<Invitation[]> {
   try {
     const { data } = await axios.get(`${baseUrl}/poll_invitations`, {
       headers: { Authorization: "Bearer " + token },
@@ -181,13 +189,16 @@ export async function getReceivedInvitations(token: string) {
         };
       }
     );
-    return [false, invitations];
+    return invitations;
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
-export async function acceptInvitation(invitationId: string, token: string) {
+export async function acceptInvitation(
+  invitationId: string,
+  token: string
+): Promise<Game["id"]> {
   try {
     const { data } = await axios.post(
       `${baseUrl}/respond_invitation`,
@@ -197,15 +208,18 @@ export async function acceptInvitation(invitationId: string, token: string) {
       },
       { headers: { Authorization: "Bearer " + token } }
     );
-    return [false, data?.game_id];
+    return data?.game_id;
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
-export async function declineInvitation(invitationId: string, token: string) {
+export async function declineInvitation(
+  invitationId: string,
+  token: string
+): Promise<void> {
   try {
-    const { data } = await axios.post(
+    await axios.post(
       `${baseUrl}/respond_invitation`,
       {
         invitation_id: invitationId,
@@ -213,15 +227,15 @@ export async function declineInvitation(invitationId: string, token: string) {
       },
       { headers: { Authorization: "Bearer " + token } }
     );
-    return [false, data?.detail];
-  } catch (error) {
-    return [true, null];
-  }
+  } catch (error) {}
 }
 
-export async function cancelInvitation(invitationId: string, token: string) {
+export async function cancelInvitation(
+  invitationId: string,
+  token: string
+): Promise<void> {
   try {
-    const { data } = await axios.post(
+    await axios.post(
       `${baseUrl}/cancel_invitation`,
       {},
       {
@@ -229,13 +243,14 @@ export async function cancelInvitation(invitationId: string, token: string) {
         params: { invitation_id: invitationId },
       }
     );
-    return [false, data?.detail];
-  } catch (error) {
-    return [true, null];
-  }
+  } catch (error) {}
 }
 
-export async function makeMove(gameId: string, cell: string, token: string) {
+export async function makeMove(
+  gameId: string,
+  cell: string,
+  token: string
+): Promise<Game["state"]> {
   try {
     const { data } = await axios.post(
       `${baseUrl}/make_move`,
@@ -247,28 +262,48 @@ export async function makeMove(gameId: string, cell: string, token: string) {
         headers: { Authorization: "Bearer " + token },
       }
     );
-    return [null, data?.game_state];
+    return data?.game_state;
   } catch (error) {
-    return [true, null];
+    throw new Error();
   }
 }
 
-export async function pollGame(gameId: string, token: string) {
+export async function pollGame(
+  gameId: Game["id"],
+  token: string
+): Promise<PollGameResponse> {
   try {
     const { data } = await axios.get(`${baseUrl}/poll_game`, {
       headers: { Authorization: "Bearer " + token },
       params: { game_id: gameId },
     });
-    return [
-      false,
-      {
-        newMove: data.new_move,
-        state: data.game_state,
-        cell: data?.cell,
-      },
-    ];
+    return {
+      newMove: data.new_move,
+      state: data.game_state,
+      cell: data?.cell,
+    };
   } catch (error) {
-    return [true, null];
+    throw new Error();
+  }
+}
+
+export async function getGame(gameId: string, token: string): Promise<Game> {
+  try {
+    const { data } = await axios.get(`${baseUrl}/get_full_game_state`, {
+      headers: { Authorization: "Bearer " + token },
+      params: { game_id: gameId },
+    });
+    return {
+      id: gameId,
+      opponent: data.opponent,
+      grid: data.grid_state,
+      winningLine: data.grid_properties.winning_line,
+      token: data.you_playing_x ? "x" : "o",
+      state: data.status,
+      isYourTurn: data.your_turn,
+    };
+  } catch (error) {
+    throw new Error();
   }
 }
 
@@ -284,6 +319,7 @@ const api = {
   stopWaiting,
   makeMove,
   pollGame,
+  getGame,
 };
 
 export default api;

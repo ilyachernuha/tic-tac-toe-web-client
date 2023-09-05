@@ -1,4 +1,4 @@
-interface Invitation {
+type Invitation = {
   id: string;
   gameId: string;
   inviter: string;
@@ -7,11 +7,20 @@ interface Invitation {
   winningLine: number;
   inviterPlayingX: boolean;
   status: "pending" | "accepted" | "declined" | "cancelled";
-}
+};
 
-interface Game {
+type Game = {
   id: string;
-  gridSize: number;
-  playingX: boolean;
   winningLine: number;
-}
+  opponent: string;
+  grid: ("x" | "o" | "")[][];
+  state: "ongoing";
+  token: "x" | "o";
+  isYourTurn: boolean;
+};
+
+type PollGameResponse = {
+  cell: string;
+  newMove: string;
+  state: Game["state"];
+};

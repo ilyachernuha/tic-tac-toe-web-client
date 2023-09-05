@@ -1,10 +1,9 @@
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth, useMenu } from "../../hooks";
 import {
   PlayerCard,
   ReceivedInvitationCard,
   SentInvitationCard,
 } from "../../components/";
-import { useMenu } from "../../hooks/useMenu";
 
 interface Menu {
   setGame: ({}: Game) => void;
@@ -26,11 +25,11 @@ export const Menu = ({ setGame }: Menu) => {
     setGame,
   });
 
-  const noWaitingUsers = waitingUsers.length < 2;
+  const noWaitingUsers = waitingUsers.length === 0;
   const waitingUsersElements = waitingUsers.map((name) => {
-    if (name === username) return;
     return <PlayerCard key={name} name={name} onInvite={handleInvite} />;
   });
+
   const noSentInvitations = sentInvitations.length === 0;
   const sentInvitationsElements = sentInvitations.map((invitation) => {
     if (invitation.status === "cancelled") return;
