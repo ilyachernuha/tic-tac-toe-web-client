@@ -3,6 +3,18 @@ import { createUser, loginUser } from "../api";
 import { AuthContext } from "../contexts/AuthContext";
 import { useCookies } from "react-cookie";
 
+const validateCredentials = (username: string, password: string) => {
+  if (!/^[a-zA-Z0-9]+$/.test(username)) {
+    throw new Error("Username can have only English letters and numbers");
+  }
+
+  if (!/^[!-~]+$/.test(password)) {
+    throw new Error(
+      "Password can have only ASCII symbols excluding whitespace"
+    );
+  }
+};
+
 export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [username, setUsername] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -28,17 +40,15 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!username) {
-      return setError("Username is required");
-    }
-
-    if (!password) {
-      return setError("Password is required");
-    }
-
-    setLoginPushed(true);
-
     try {
+      if (!username) throw new Error("Username is required");
+
+      if (!password) throw new Error("Password is required");
+
+      validateCredentials(username, password);
+
+      setLoginPushed(true);
+
       const token = await loginUser(username, password);
       setCookie("jwt_token", token);
       setCookie("username", username);
@@ -57,15 +67,13 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const handleRegister = async (event: React.FormEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
-    if (!username) {
-      return setError("Username is required");
-    }
-
-    if (!password) {
-      return setError("Password is required");
-    }
-
     try {
+      if (!username) throw new Error("Username is required");
+
+      if (!password) throw new Error("Password is required");
+
+      validateCredentials(username, password);
+
       const token = await createUser(username, password);
       setCookie("jwt_token", token);
       setCookie("username", username);

@@ -20,8 +20,8 @@ export async function createUser(
       {},
       {
         auth: {
-          username,
-          password,
+          username: username,
+          password: password,
         },
       }
     );
