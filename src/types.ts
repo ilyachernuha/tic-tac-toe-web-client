@@ -17,6 +17,7 @@ type Game = {
   state: "ongoing";
   token: "x" | "o";
   isYourTurn: boolean;
+  gridSize: number;
 };
 
 type PollGameResponse = {

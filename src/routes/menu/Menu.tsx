@@ -1,5 +1,6 @@
 import { useAuth, useMenu } from "../../hooks";
 import {
+  GameCard,
   PlayerCard,
   ReceivedInvitationCard,
   SentInvitationCard,
@@ -16,6 +17,7 @@ export const Menu = ({ setGame }: Menu) => {
     waitingUsers,
     sentInvitations,
     receivedInvitations,
+    ongoingGames,
     handleAccept,
     handleCancel,
     handleDecline,
@@ -32,13 +34,12 @@ export const Menu = ({ setGame }: Menu) => {
 
   const noSentInvitations = sentInvitations.length === 0;
   const sentInvitationsElements = sentInvitations.map((invitation) => {
-    if (invitation.status === "cancelled") return;
     return (
       <SentInvitationCard
         key={invitation.id}
         invitation={invitation}
         token={invitation.inviterPlayingX ? "x" : "o"}
-        onPlay={() => handlePlay(invitation)}
+        onPlay={() => handlePlay(invitation.id)}
         onCancel={() => handleCancel(invitation.id)}
       />
     );
@@ -54,6 +55,13 @@ export const Menu = ({ setGame }: Menu) => {
       onDecline={() => handleDecline(invitation.id)}
     />
   ));
+
+  const noOngoingGames = ongoingGames.length === 0;
+  const ongoingGamesElements = ongoingGames.map((game) => {
+    return (
+      <GameCard key={game.id} game={game} onPlay={() => handlePlay(game.id)} />
+    );
+  });
 
   return (
     <>
@@ -79,6 +87,11 @@ export const Menu = ({ setGame }: Menu) => {
         <h2 className="heading-3">Received Invitations</h2>
         {noReceivedInvitations && <p>No received invitations</p>}
         <ul>{receivedInvitationsElements}</ul>
+      </div>
+      <div className="section container">
+        <h2 className="heading-3">Ongoing games</h2>
+        {noOngoingGames && <p>No ongoing games</p>}
+        <ul>{ongoingGamesElements}</ul>
       </div>
     </>
   );

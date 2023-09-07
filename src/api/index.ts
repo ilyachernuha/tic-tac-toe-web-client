@@ -301,6 +301,7 @@ export async function getGame(gameId: string, token: string): Promise<Game> {
       token: data.you_playing_x ? "x" : "o",
       state: data.status,
       isYourTurn: data.your_turn,
+      gridSize: data.grid_state.length,
     };
   } catch (error) {
     throw new Error();
@@ -326,10 +327,9 @@ export async function playAgain(
     return {
       status: data?.status,
       gameId: data?.new_game_id,
-      // switchSides: data?.switch_sides,
     };
   } catch (error) {
-    console.log(error);
+    throw new Error();
   }
 }
 
@@ -351,6 +351,34 @@ export async function pollPlayAgain(
   }
 }
 
+export async function getGames(token: string): Promise<Game[]> {
+  try {
+    const { data } = await axios.get(`${baseUrl}/get_ongoing_games`, {
+      headers: { Authorization: "Bearer " + token },
+    });
+    return data?.ongoing_games.map(
+      ({
+        game_id,
+        opponent,
+        you_playing_x,
+        play_again_scheme,
+        grid_properties: { size, winning_line },
+      }: any) => {
+        return {
+          id: game_id,
+          opponent: opponent,
+          mode: play_again_scheme,
+          token: you_playing_x ? "x" : "o",
+          gridSize: size,
+          winningLine: winning_line,
+        };
+      }
+    );
+  } catch (error) {
+    throw new Error();
+  }
+}
+
 const api = {
   acceptInvitation,
   cancelInvitation,
@@ -366,6 +394,7 @@ const api = {
   getGame,
   playAgain,
   pollPlayAgain,
+  getGames,
 };
 
 export default api;

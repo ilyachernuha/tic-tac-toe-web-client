@@ -14,6 +14,7 @@ export const useMenu = ({ setGame }: useMenu) => {
   const [receivedInvitations, setReceivedInvitations] = useState<Invitation[]>(
     []
   );
+  const [ongoingGames, setOngoingGames] = useState<Game[]>([]);
 
   const startWaiting = async () => {
     await api.startWaiting(authToken);
@@ -34,6 +35,10 @@ export const useMenu = ({ setGame }: useMenu) => {
     setSentInvitations(invitations);
   };
 
+  const fetchOngoingGames = async () => {
+    const games = await api.getGames(authToken);
+    setOngoingGames(games);
+  };
   interface FormDataElements extends HTMLFormControlsCollection {
     gridSize: HTMLInputElement;
     winningLine: HTMLInputElement;
@@ -72,7 +77,7 @@ export const useMenu = ({ setGame }: useMenu) => {
     fetchSentIvitations();
   };
 
-  const handlePlay = async ({ gameId }: Invitation) => {
+  const handlePlay = async (gameId: Game["id"]) => {
     const game = await api.getGame(gameId, authToken);
     setGame(game);
   };
@@ -82,11 +87,13 @@ export const useMenu = ({ setGame }: useMenu) => {
       fetchWaitingUsers();
       fetchReceivedInvitations();
       fetchSentIvitations();
+      fetchOngoingGames();
     }, 2000);
     startWaiting();
     fetchWaitingUsers();
     fetchReceivedInvitations();
     fetchSentIvitations();
+    fetchOngoingGames();
     return () => {
       api.stopWaiting(authToken);
       clearInterval(pollingInterval);
@@ -97,6 +104,7 @@ export const useMenu = ({ setGame }: useMenu) => {
     waitingUsers,
     sentInvitations,
     receivedInvitations,
+    ongoingGames,
     handleInvite,
     handlePlay,
     handleCancel,
