@@ -307,6 +307,50 @@ export async function getGame(gameId: string, token: string): Promise<Game> {
   }
 }
 
+export async function playAgain(
+  gameId: string,
+  isPlayAgain: boolean,
+  token: string
+): Promise<any> {
+  try {
+    const { data } = await axios.post(
+      `${baseUrl}/play_again`,
+      {
+        game_id: gameId,
+        play_again: isPlayAgain,
+      },
+      {
+        headers: { Authorization: "Bearer " + token },
+      }
+    );
+    return {
+      status: data?.status,
+      gameId: data?.new_game_id,
+      // switchSides: data?.switch_sides,
+    };
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function pollPlayAgain(
+  gameId: string,
+  token: string
+): Promise<any> {
+  try {
+    const { data } = await axios.get(`${baseUrl}/poll_play_again_status`, {
+      headers: { Authorization: "Bearer " + token },
+      params: { game_id: gameId },
+    });
+    return {
+      status: data?.play_again_status,
+      gameId: data?.next_game_id,
+    };
+  } catch (error) {
+    throw new Error();
+  }
+}
+
 const api = {
   acceptInvitation,
   cancelInvitation,
@@ -320,6 +364,8 @@ const api = {
   makeMove,
   pollGame,
   getGame,
+  playAgain,
+  pollPlayAgain,
 };
 
 export default api;
