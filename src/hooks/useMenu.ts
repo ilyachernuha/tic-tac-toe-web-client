@@ -7,7 +7,7 @@ interface useMenu {
 }
 
 export const useMenu = ({ setGame }: useMenu) => {
-  const { authToken } = useAuth();
+  const { authToken, onLogout } = useAuth();
 
   const [waitingUsers, setWaitingUsers] = useState<string[]>([]);
   const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
@@ -17,7 +17,11 @@ export const useMenu = ({ setGame }: useMenu) => {
   const [ongoingGames, setOngoingGames] = useState<Game[]>([]);
 
   const startWaiting = async () => {
-    await api.startWaiting(authToken);
+    try {
+      await api.startWaiting(authToken);
+    } catch (error) {
+      onLogout();
+    }
   };
 
   const fetchWaitingUsers = async () => {
