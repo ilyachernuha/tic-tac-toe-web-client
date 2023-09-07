@@ -171,7 +171,7 @@ export function Game({ game, setGame }: GameProps) {
     if (state === "draw") return `Draw`;
     if (state === "won_by_x") {
       if (token === "x") return `You win!`;
-      if (token === "o") return `You loose!`;
+      if (token === "o") return `You lose!`;
     }
     if (state === "won_by_o") {
       if (token === "o") return `You win!`;
