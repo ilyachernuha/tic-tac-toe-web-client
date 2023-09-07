@@ -47,7 +47,8 @@ interface GameProps {
 }
 
 export function Game({ game, setGame }: GameProps) {
-  const { token, grid, id, isYourTurn, opponent, winningLine, state } = game;
+  const { token, grid, id, isYourTurn, opponent, winningLine, mode, state } =
+    game;
   const { authToken } = useAuth();
 
   const [playAgain, setPlayAgain] = useState<any>(null);
@@ -76,7 +77,6 @@ export function Game({ game, setGame }: GameProps) {
   };
 
   const pollGame = async () => {
-    console.log("Poll game");
     try {
       const { newMove, state, cell } = await api.pollGame(id, authToken);
       if (newMove && cell) {
@@ -110,7 +110,6 @@ export function Game({ game, setGame }: GameProps) {
   };
 
   const pollPlayAgain = async () => {
-    console.log("Poll play again");
     try {
       const { status, gameId } = await api.pollPlayAgain(id, authToken);
       setPlayAgain({ status: status, gameId: gameId });
@@ -194,6 +193,9 @@ export function Game({ game, setGame }: GameProps) {
         </p>
         <p>
           Winning line: <span>{winningLine}</span>
+        </p>
+        <p>
+          Mode: <span className="uppercase">{mode}</span>
         </p>
         <p>
           Game state: <span className="uppercase">{state}</span>

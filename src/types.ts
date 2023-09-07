@@ -7,6 +7,7 @@ type Invitation = {
   winningLine: number;
   inviterPlayingX: boolean;
   status: "pending" | "accepted" | "declined" | "cancelled";
+  mode: Game["mode"];
 };
 
 type Game = {
@@ -18,6 +19,7 @@ type Game = {
   token: "x" | "o";
   isYourTurn: boolean;
   gridSize: number;
+  mode: "same" | "alternating" | "winner_plays_x" | "winner_plays_o";
 };
 
 type PollGameResponse = {

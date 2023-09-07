@@ -9,7 +9,7 @@ interface SentInvitationCard extends InvitationCard {
 }
 
 export const SentInvitationCard = ({
-  invitation: { gridSize, winningLine, status, invited },
+  invitation: { gridSize, winningLine, status, invited, mode },
   token,
   onPlay,
   onCancel,
@@ -28,7 +28,7 @@ export const SentInvitationCard = ({
           Your token: <span>{token}</span>
         </p>
         <p>
-          Status: <span>{status}</span>
+          Mode: <span>{mode}</span>
         </p>
       </div>
       <div className="card__buttons">
@@ -61,7 +61,7 @@ interface ReceivedInvitationCard extends InvitationCard {
 }
 
 export const ReceivedInvitationCard = ({
-  invitation: { gridSize, winningLine, inviter },
+  invitation: { gridSize, winningLine, inviter, mode },
   token,
   onAccept,
   onDecline,
@@ -78,6 +78,9 @@ export const ReceivedInvitationCard = ({
         </p>
         <p>
           Your token: <span>{token}</span>
+        </p>
+        <p>
+          Mode: <span>{mode}</span>
         </p>
       </div>
       <div className="card__buttons">

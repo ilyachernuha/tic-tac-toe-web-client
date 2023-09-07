@@ -4,7 +4,7 @@ interface GameCard {
 }
 
 export const GameCard = ({
-  game: { gridSize, winningLine, opponent, token },
+  game: { gridSize, winningLine, opponent, token, mode },
   onPlay,
 }: GameCard) => {
   return (
@@ -19,6 +19,9 @@ export const GameCard = ({
         </p>
         <p>
           Your token: <span>{token}</span>
+        </p>
+        <p>
+          Mode: <span>{mode}</span>
         </p>
       </div>
       <div className="card__buttons">

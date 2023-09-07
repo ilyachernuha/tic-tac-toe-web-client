@@ -153,6 +153,7 @@ export async function getSentInvitations(token: string): Promise<Invitation[]> {
         status,
         invited,
         game_id,
+        play_again_scheme,
       }: any) => {
         return {
           id: invitation_id,
@@ -162,6 +163,7 @@ export async function getSentInvitations(token: string): Promise<Invitation[]> {
           status: status,
           invited: invited,
           gameId: game_id,
+          mode: play_again_scheme,
         };
       }
     );
@@ -179,13 +181,20 @@ export async function getReceivedInvitations(
       headers: { Authorization: "Bearer " + token },
     });
     const invitations = data.invitations.map(
-      ({ invitation_id, inviter, inviter_playing_x, grid_properties }: any) => {
+      ({
+        invitation_id,
+        inviter,
+        inviter_playing_x,
+        grid_properties,
+        play_again_scheme,
+      }: any) => {
         return {
           id: invitation_id,
           inviter: inviter,
           inviterPlayingX: inviter_playing_x,
           gridSize: grid_properties.size,
           winningLine: grid_properties.winning_line,
+          mode: play_again_scheme,
         };
       }
     );
@@ -295,13 +304,14 @@ export async function getGame(gameId: string, token: string): Promise<Game> {
     });
     return {
       id: gameId,
-      opponent: data.opponent,
-      grid: data.grid_state,
-      winningLine: data.grid_properties.winning_line,
-      token: data.you_playing_x ? "x" : "o",
-      state: data.status,
-      isYourTurn: data.your_turn,
-      gridSize: data.grid_state.length,
+      opponent: data?.opponent,
+      grid: data?.grid_state,
+      winningLine: data?.grid_properties?.winning_line,
+      token: data?.you_playing_x ? "x" : "o",
+      state: data?.status,
+      isYourTurn: data?.your_turn,
+      gridSize: data?.grid_state.length,
+      mode: data?.play_again_scheme,
     };
   } catch (error) {
     throw new Error();
