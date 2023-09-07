@@ -153,7 +153,7 @@ export function Game({ game, setGame }: GameProps) {
       stopGamePolling();
       stopPlayAgainPolling();
     };
-  }, [state, isYourTurn, playAgainPollingTimer]);
+  }, [state, isYourTurn]);
 
   const getPlayAgainStatus = (status: string) => {
     if (status === "decline") return `${opponent} doesn't want to play again`;
