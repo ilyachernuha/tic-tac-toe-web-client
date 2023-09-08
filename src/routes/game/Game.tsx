@@ -155,7 +155,7 @@ export function Game({ game, setGame }: GameProps) {
   }, [state, isYourTurn]);
 
   const getPlayAgainStatus = (status: string) => {
-    if (status === "decline") return `${opponent} doesn't want to play again`;
+    if (status === "declined") return `${opponent} doesn't want to play again`;
     if (status === "requested_by_x") {
       if (token === "x") return `you invited ${opponent} to play again`;
       if (token === "o") return `${opponent} invited you to play again`;
