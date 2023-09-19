@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 import api from "../api";
+import { useNavigate } from "react-router-dom";
 
-interface useMenu {
-  setGame: ({}: Game) => void;
-}
-
-export const useMenu = ({ setGame }: useMenu) => {
+export const useMenu = () => {
   const { authToken, onLogout } = useAuth();
+  const navigate = useNavigate();
 
   const [waitingUsers, setWaitingUsers] = useState<string[]>([]);
   const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
@@ -69,8 +67,7 @@ export const useMenu = ({ setGame }: useMenu) => {
 
   const handleAccept = async ({ id }: Invitation) => {
     const gameId = await api.acceptInvitation(id, authToken);
-    const game = await api.getGame(gameId, authToken);
-    setGame(game);
+    navigate(`/game/${gameId}`);
   };
 
   const handleDecline = async (invitationId: string) => {
@@ -84,8 +81,7 @@ export const useMenu = ({ setGame }: useMenu) => {
   };
 
   const handlePlay = async (gameId: Game["id"]) => {
-    const game = await api.getGame(gameId, authToken);
-    setGame(game);
+    navigate(`/game/${gameId}`);
   };
 
   useEffect(() => {

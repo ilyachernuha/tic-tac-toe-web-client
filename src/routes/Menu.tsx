@@ -1,16 +1,12 @@
-import { useAuth, useMenu } from "../../hooks";
+import { useAuth, useMenu } from "../hooks";
 import {
   GameCard,
   PlayerCard,
   ReceivedInvitationCard,
   SentInvitationCard,
-} from "../../components/";
+} from "../components";
 
-interface Menu {
-  setGame: ({}: Game) => void;
-}
-
-export const Menu = ({ setGame }: Menu) => {
+export const Menu = () => {
   const { username, onLogout } = useAuth();
 
   const {
@@ -23,9 +19,7 @@ export const Menu = ({ setGame }: Menu) => {
     handleDecline,
     handleInvite,
     handlePlay,
-  } = useMenu({
-    setGame,
-  });
+  } = useMenu();
 
   const noWaitingUsers = waitingUsers.length === 0;
   const waitingUsersElements = waitingUsers.map((name) => {

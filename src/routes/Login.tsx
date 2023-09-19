@@ -1,6 +1,6 @@
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 
-export const LoginForm = () => {
+export const Login = () => {
   const { onLogin, onRegister, onFormChange, error, loginPushed } = useAuth();
   return (
     <div className="section container login-form">

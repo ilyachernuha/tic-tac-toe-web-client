@@ -15,7 +15,7 @@ type Game = {
   winningLine: number;
   opponent: string;
   grid: ("x" | "o" | "")[][];
-  state: "ongoing";
+  state: "ongoing" | "won_by_x" | "won_by_o" | "draw";
   token: "x" | "o";
   isYourTurn: boolean;
   gridSize: number;
