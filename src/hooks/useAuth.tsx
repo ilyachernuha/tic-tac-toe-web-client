@@ -85,6 +85,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       const token = await createUser(username, password);
       setCookie("jwt_token", token);
       setCookie("username", username);
+      navigate("/", { replace: true });
     } catch (error: any) {
       setError(error.message);
     }

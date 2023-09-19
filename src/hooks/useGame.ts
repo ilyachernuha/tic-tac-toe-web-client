@@ -117,7 +117,7 @@ export const useGame = (id: Game["id"]) => {
 
   const handleMainMenu = async () => {
     await api.playAgain(id, false, authToken);
-    navigate("/menu", { replace: true });
+    navigate("/", { replace: true });
   };
 
   const getPlayAgainStatus = () => {
