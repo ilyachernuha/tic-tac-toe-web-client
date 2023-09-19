@@ -47,6 +47,7 @@ export const useMenu = ({ setGame }: useMenu) => {
     gridSize: HTMLInputElement;
     winningLine: HTMLInputElement;
     playingToken: HTMLSelectElement;
+    gameMode: HTMLSelectElement;
   }
 
   const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -54,12 +55,13 @@ export const useMenu = ({ setGame }: useMenu) => {
     const form = event.currentTarget;
     const username = form.dataset.username as string;
     const elements = form.elements as FormDataElements;
-    const { gridSize, winningLine, playingToken } = elements;
+    const { gridSize, winningLine, playingToken, gameMode } = elements;
     const invitation = {
       invited: username,
       inviterPlayingX: playingToken.value === "x",
       gridSize: Number(gridSize.value),
       winningLine: Number(winningLine.value),
+      mode: gameMode.value,
     };
     await api.sendInvitation(invitation as Invitation, authToken);
     fetchSentIvitations();

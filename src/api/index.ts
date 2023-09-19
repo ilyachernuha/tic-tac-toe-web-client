@@ -103,7 +103,7 @@ export async function getWaitingUsers(token: string): Promise<string[]> {
 }
 
 export async function sendInvitation(
-  { invited, inviterPlayingX, gridSize, winningLine }: Invitation,
+  { invited, inviterPlayingX, gridSize, winningLine, mode }: Invitation,
   token: string
 ): Promise<Invitation["id"]> {
   try {
@@ -116,6 +116,7 @@ export async function sendInvitation(
           winning_line: winningLine,
         },
         inviter_playing_x: inviterPlayingX,
+        play_again_scheme: mode,
       },
       { headers: { Authorization: "Bearer " + token } }
     );

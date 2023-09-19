@@ -45,6 +45,15 @@ export const PlayerCard = ({ name, onInvite }: PlayerCard) => {
               <option value="o">O</option>
             </select>
           </label>
+          <label htmlFor="gameMode">
+            Mode:
+            <select name="gameMode" id="gameMode" defaultValue="same" required>
+              <option value="same">same</option>
+              <option value="alternating">alternating</option>
+              <option value="winner_plays_x">winner_plays_x</option>
+              <option value="winner_plays_o">winner_plays_o</option>
+            </select>
+          </label>
         </div>
         <div>
           <button className="button" type="submit" data-type="primary">
